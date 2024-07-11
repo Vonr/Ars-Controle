@@ -1,15 +1,21 @@
-# Ars-Nouveau-Example-Addon
+# Ars Controle
 
-An example repository for making an addon for Ars Nouveau! See the wiki for more info.
+Addon for Ars Nouveau focused on increasing control.
 
-**Getting Started**
+## Content
 
-* Fork this repo for a ready to build work space.
-* Join the Ars Nouveau discord to ask questions, get help, or get ideas.
+### Warping Spell Prism ![](https://github.com/Vonr/Ars-Controle/blob/1.20.x/src/main/resources/assets/ars_controle/textures/block/warping_spell_prism.png?raw=true)
 
-Some useful links for beginners:
-* https://mcforge.readthedocs.io/en/latest/
-* https://forge.gemwire.uk/wiki/
-* https://wiki.mcjty.eu/modding/index.php?title=Main_Page
-* https://github.com/baileyholl/Ars-Nouveau/tree/1.18.x/src/main/java/com/hollingsworth/arsnouveau/api (Full API documentation)
-* https://github.com/bernie-g/geckolib/wiki (Animation library used by Ars Nouveau, optional)
+The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions -
+as long as both the prism and the destination are loaded.
+
+### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.20.x/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
+
+The Remote is an item that lets you remotely configure blocks such as the Warping Spell Prism and Storage Lectern.
+(Currently only supports those two blocks, more may be added in the future.)
+
+To use it, first use it on the block you would like to configure.
+Then, you can use it again on other blocks or entities depending on what the block you are configuring accepts.
+
+The remote will allow for cross dimensional configuration of the Warping Spell Prism, unlike the Dominion Wand
+which does not store dimensions.
