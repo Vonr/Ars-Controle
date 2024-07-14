@@ -1,5 +1,6 @@
 package dev.qther.ars_controle.packets;
 
+import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -33,13 +34,13 @@ public class PacketClearRemote {
                     var tag = stack.getTag();
                     if (tag == null) {
                         stack.setTag(new CompoundTag());
-                        player.sendSystemMessage(Component.translatable("ars_controle.target.set.none"));
+                        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.none"));
                         return;
                     }
                     tag.remove("target");
                     tag.remove("targetName");
                     tag.remove("dimension");
-                    player.sendSystemMessage(Component.translatable("ars_controle.target.set.none"));
+                    PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.none"));
                 }
             });
         }

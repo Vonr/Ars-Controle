@@ -1,5 +1,6 @@
 package dev.qther.ars_controle;
 
+import com.hollingsworth.arsnouveau.setup.config.ANModConfig;
 import dev.qther.ars_controle.packets.PacketClearRemote;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -7,7 +8,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -27,6 +30,10 @@ public class ArsControle {
         ArsNouveauRegistry.registerGlyphs();
         bus.addListener(this::setup);
         bus.addListener(this::doClientStuff);
+
+        ANModConfig serverConfig = new ANModConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, ModLoadingContext.get().getActiveContainer(), MODID + "-server");
+
+        ModLoadingContext.get().getActiveContainer().addConfig(serverConfig);
         MinecraftForge.EVENT_BUS.register(this);
     }
 

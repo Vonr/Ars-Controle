@@ -1,8 +1,9 @@
 package dev.qther.ars_controle.item;
 
-import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
+import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
-import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
+import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.Cached;
 import dev.qther.ars_controle.registry.ModRegistry;
 import dev.qther.ars_controle.tile.WarpingSpellPrismTile;
 import net.minecraft.core.BlockPos;
@@ -53,69 +54,47 @@ public class RemoteItem extends ModItem {
         var level = player.level();
         if (!tag.contains("target", 99)) {
             var block = level.getBlockState(blockPos);
-            if (!block.hasBlockEntity()) {
-                player.sendSystemMessage(Component.translatable("ars_controle.target.get.none"));
-                return InteractionResult.FAIL;
+            if (!block.hasBlockEntity() || !(level.getBlockEntity(blockPos) instanceof IWandable)) {
+                return InteractionResult.PASS;
             }
             tag.putLong("target", blockPos.asLong());
             tag.putString("dimension", level.dimension().location().toString());
-            player.sendSystemMessage(Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
             tag.putString("targetName", block.getBlock().getDescriptionId());
             return InteractionResult.SUCCESS;
         }
 
         var targetPos = BlockPos.of(tag.getLong("target"));
         var targetDim = tag.getString("dimension");
+        var tile = level.getBlockEntity(targetPos);
 
-        if (level.getBlockState(targetPos).is(BlockRegistry.CRAFTING_LECTERN.get())) {
+        if (tile instanceof IWandable wandable) {
             if (!level.dimension().location().toString().equals(targetDim)) {
-                player.sendSystemMessage(Component.translatable("ars_controle.remote.error.different_dimension"));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.different_dimension"));
                 return InteractionResult.FAIL;
             }
 
-            var _tile = level.getBlockEntity(targetPos);
-            if (_tile == null) {
-                player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                return InteractionResult.FAIL;
-            }
+            wandable.onFinishedConnectionLast(blockPos, ctx.getClickedFace(), null, player);
+            return InteractionResult.SUCCESS;
+        }
 
-            if (!(_tile instanceof StorageLecternTile tile)) {
-                player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                return InteractionResult.FAIL;
-            }
+        // We would like to do this properly via IWandable but we would need that to use GlobalPos, which should be coming in Ars 1.21.
 
-            tile.onFinishedConnectionLast(blockPos, ctx.getClickedFace(), null, player);
+        var l = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim);
+        if (l == null) {
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
             return InteractionResult.FAIL;
         }
 
-        for (var l : level.getServer().getAllLevels()) {
-            if (!targetDim.equals(l.dimension().location().toString())) {
-                continue;
-            }
-
-            var b = l.getBlockState(targetPos);
-            if (b.is(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get())) {
-                var _tile = l.getBlockEntity(targetPos);
-                if (_tile == null) {
-                    player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-                if (!(_tile instanceof WarpingSpellPrismTile tile)) {
-                    player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-
-                tile.setBlock(level.dimension(), blockPos);
-
-                player.sendSystemMessage(Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
-
-                return InteractionResult.SUCCESS;
-            }
+        tile = l.getBlockEntity(targetPos);
+        if (!(tile instanceof WarpingSpellPrismTile wandable)) {
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_targeti"));
+            return InteractionResult.FAIL;
         }
 
-        player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
+        wandable.onFinishedConnectionLast(blockPos, null, null, player);
 
-        return InteractionResult.FAIL;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -132,39 +111,39 @@ public class RemoteItem extends ModItem {
         }
 
         if (!tag.contains("target", 99)) {
-            player.sendSystemMessage(Component.translatable("ars_controle.target.get.none"));
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
             return InteractionResult.FAIL;
         }
 
         var targetPos = BlockPos.of(tag.getLong("target"));
         var targetDim = tag.getString("dimension");
 
-        for (var l : level.getServer().getAllLevels()) {
-            if (!targetDim.equals(l.dimension().location().toString())) {
-                continue;
-            }
-
-            var b = l.getBlockState(targetPos);
-            if (b.is(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get())) {
-                var _tile = l.getBlockEntity(targetPos);
-                if (_tile == null) {
-                    player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-                if (!(_tile instanceof WarpingSpellPrismTile tile)) {
-                    player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-
-                tile.setEntityUUID(entity.getUUID());
-
-                player.sendSystemMessage(Component.translatable("ars_controle.target.set.entity", entity.getDisplayName().getString(), level.dimension().location().toString()));
-
-                return InteractionResult.SUCCESS;
-            }
+        var l = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim);
+        if (l == null) {
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
+            return InteractionResult.FAIL;
         }
 
-        player.sendSystemMessage(Component.translatable("ars_controle.remote.error.invalid_target"));
+        var b = l.getBlockState(targetPos);
+        if (b.is(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get())) {
+            var _tile = l.getBlockEntity(targetPos);
+            if (_tile == null) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
+                return InteractionResult.FAIL;
+            }
+            if (!(_tile instanceof WarpingSpellPrismTile tile)) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
+                return InteractionResult.FAIL;
+            }
+
+            tile.setEntityUUID(entity.getUUID());
+
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName().getString(), level.dimension().location().toString()));
+
+            return InteractionResult.SUCCESS;
+        }
+
+        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
 
         return InteractionResult.FAIL;
     }

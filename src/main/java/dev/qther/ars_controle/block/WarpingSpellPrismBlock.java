@@ -7,9 +7,9 @@ import com.hollingsworth.arsnouveau.api.util.SourceUtil;
 import com.hollingsworth.arsnouveau.common.advancement.ANCriteriaTriggers;
 import com.hollingsworth.arsnouveau.common.block.ModBlock;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
-import com.hollingsworth.arsnouveau.common.items.DominionWand;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAccelerate;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDecelerate;
+import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.tile.WarpingSpellPrismTile;
 import net.minecraft.core.BlockPos;
@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,54 +69,30 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             if (player.isCrouching()) {
                 tile.setEntityUUID(player.getUUID());
                 tile.setChanged();
-                player.sendSystemMessage(Component.translatable("ars_controle.target.set.self"));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.self"));
                 return InteractionResult.SUCCESS;
             }
 
             var hitResult = tile.getHitResult();
             if (hitResult == null) {
-                player.sendSystemMessage(Component.translatable("ars_controle.target.get.none"));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
                 return InteractionResult.SUCCESS;
             }
 
             if (hitResult instanceof EntityHitResult e) {
                 var entity = e.getEntity();
-                player.sendSystemMessage(Component.translatable("ars_controle.target.get.entity", entity.getDisplayName(), entity.level().dimension().location().toString()));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.entity", entity.getDisplayName(), entity.level().dimension().location().toString()));
                 return InteractionResult.SUCCESS;
             }
 
             if (hitResult instanceof BlockHitResult b) {
                 var dim = tile.getTargetLevel();
-                player.sendSystemMessage(Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
                 return InteractionResult.SUCCESS;
             }
         }
 
-        var item = stack.getItem();
-
-        if (item instanceof DominionWand) {
-            var data = new DominionWand.DominionData(stack);
-            var entity = data.getEntity(player.level());
-            if (entity != null) {
-                tile.setEntityUUID(entity.getUUID());
-                tile.setChanged();
-                data.setStoredEntityID(-1);
-                player.sendSystemMessage(Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), entity.level().dimension().location().toString()));
-                return InteractionResult.SUCCESS;
-            }
-
-            var blockPos = data.getStoredPos();
-            if (blockPos != null) {
-                tile.setBlock(worldIn.dimension(), blockPos);
-                data.setStoredPos(null);
-                data.setFacing(null);
-                tile.setChanged();
-                player.sendSystemMessage(Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), worldIn.dimension().location().toString()));
-
-                return InteractionResult.SUCCESS;
-            }
-        }
-        return InteractionResult.FAIL;
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -133,15 +110,16 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             return;
         }
 
-        if (hit instanceof BlockHitResult b) {
-            var dim = tile.getTargetLevel();
-            if (dim == null) {
-                world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
-                spell.remove(RemovalReason.DISCARDED);
-                return;
-            }
+        var dim = tile.getTargetLevel();
+        if (dim == null || !dim.isLoaded(BlockPos.containing(hit.getLocation()))) {
+            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            spell.remove(RemovalReason.DISCARDED);
+            return;
+        }
 
-            if (spell.level() != dim) {
+        var oldLevel = spell.level();
+        if (hit instanceof BlockHitResult b) {
+            if (oldLevel != dim) {
                 var newSpell = changeSpellLevel(dim, spell);
                 if (newSpell != null) {
                     spell = newSpell;
@@ -151,9 +129,8 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             hit = b.withDirection(spell.getDirection());
         }
 
-        if (hit instanceof EntityHitResult e) {
-            var dim = (ServerLevel) e.getEntity().level();
-            if (spell.level() != dim) {
+        if (hit instanceof EntityHitResult) {
+            if (oldLevel != dim) {
                 var newSpell = changeSpellLevel(dim, spell);
                 if (newSpell != null) {
                     spell = newSpell;
@@ -163,33 +140,53 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         var oldPos = spell.position();
         var newPos = hit.getLocation();
-        if (!newPos.equals(oldPos)) {
-            spell.setPos(newPos);
 
-            if (++spell.prismRedirect >= 3) {
-                ANCriteriaTriggers.rewardNearbyPlayers(ANCriteriaTriggers.PRISMATIC, world, pos, 10);
-            }
-
-            int manaCost = tile.getSourceRequired(hit);
-            if (manaCost > 0 && SourceUtil.takeSourceWithParticles(pos, world, 10, manaCost) == null) {
-                world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
-                spell.remove(RemovalReason.DISCARDED);
-                return;
-            }
-
-            var acceleration = (float) spell.spellResolver.spell.getBuffsAtIndex(0, null, AugmentAccelerate.INSTANCE) - (float) spell.spellResolver.spell.getBuffsAtIndex(0, null, AugmentDecelerate.INSTANCE) * 0.5F;
-            var velocity = Math.max(0.1F, 0.5F + 0.1F * Math.min(2.0F, acceleration));
-            var dir = newPos.subtract(oldPos).normalize();
-            spell.shoot(dir.x, dir.y, dir.z, velocity, 0.0F);
-        }
-
-        SpellProjectileHitEvent event = new SpellProjectileHitEvent(spell, hit);
-        MinecraftForge.EVENT_BUS.post(event);
-        if (event.isCanceled()) {
+        if (newPos.equals(oldPos) && oldLevel == spell.level()) {
             return;
         }
-        spell.spellResolver.onResolveEffect(spell.level(), hit);
-        spell.remove(RemovalReason.DISCARDED);
+
+        spell.setPos(newPos);
+
+        if (++spell.prismRedirect >= 3) {
+            ANCriteriaTriggers.rewardNearbyPlayers(ANCriteriaTriggers.PRISMATIC, world, pos, 10);
+        }
+
+        int manaCost = tile.getSourceRequired(hit);
+        if (manaCost > 0 && SourceUtil.takeSourceWithParticles(pos, world, 10, manaCost) == null) {
+            world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
+            spell.remove(RemovalReason.DISCARDED);
+            return;
+        }
+
+        var acceleration = (float) spell.spellResolver.spell.getBuffsAtIndex(0, null, AugmentAccelerate.INSTANCE) - (float) spell.spellResolver.spell.getBuffsAtIndex(0, null, AugmentDecelerate.INSTANCE) * 0.5F;
+        var velocity = Math.max(0.1F, 0.5F + 0.1F * Math.min(2.0F, acceleration));
+        var dir = spell.getDirection().step().normalize();
+        spell.shoot(dir.x, dir.y, dir.z, velocity, 0.0F);
+
+        if (spell.level().getBlockCollisions(spell, spell.getBoundingBox()).iterator().hasNext()) {
+            SpellProjectileHitEvent event = new SpellProjectileHitEvent(spell, hit);
+            MinecraftForge.EVENT_BUS.post(event);
+            if (event.isCanceled()) {
+                return;
+            }
+            spell.spellResolver.onResolveEffect(spell.level(), hit);
+            spell.remove(RemovalReason.DISCARDED);
+        } else {
+            var entities = spell.level().getEntities(spell, spell.getBoundingBox()).iterator();
+            if (entities.hasNext()) {
+                var e = entities.next();
+
+                SpellProjectileHitEvent event = new SpellProjectileHitEvent(spell, hit);
+                MinecraftForge.EVENT_BUS.post(event);
+                if (event.isCanceled()) {
+                    return;
+                }
+                spell.spellResolver.onResolveEffect(spell.level(), new EntityHitResult(e, spell.position()));
+                spell.remove(RemovalReason.DISCARDED);
+            } else {
+                spell.setPos(spell.position().subtract(new Vec3(spell.getDirection().step().normalize().mul(velocity))));
+            }
+        }
 
         BlockUtil.updateObservers(world, pos);
     }
