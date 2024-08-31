@@ -1,19 +1,19 @@
 package dev.qther.ars_controle;
 
-import com.hollingsworth.arsnouveau.setup.config.ANModConfig;
+import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.packets.PacketClearRemote;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,25 +24,24 @@ public class ArsControle {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
-    public ArsControle() {
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+    public ArsControle(IEventBus bus, ModContainer container) {
         ModRegistry.registerRegistries(bus);
         ArsNouveauRegistry.registerGlyphs();
         bus.addListener(this::setup);
+        bus.addListener(Setup::gatherData);
+        bus.addListener(ModNetworking::register);
         bus.addListener(this::doClientStuff);
 
-        ANModConfig serverConfig = new ANModConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, ModLoadingContext.get().getActiveContainer(), MODID + "-server");
+        container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
-        ModLoadingContext.get().getActiveContainer().addConfig(serverConfig);
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     public static ResourceLocation prefix(String path) {
-        return new ResourceLocation(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        ModNetworking.registerMessages();
         ArsNouveauRegistry.registerSounds();
     }
 

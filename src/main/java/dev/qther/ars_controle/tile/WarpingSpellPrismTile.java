@@ -8,6 +8,7 @@ import dev.qther.ars_controle.ServerConfig;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -139,8 +140,8 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
 
         var uuid = this.getEntityUUID();
         if (uuid != ZERO_UUID) {

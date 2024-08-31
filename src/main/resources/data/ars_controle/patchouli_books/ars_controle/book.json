@@ -1,7 +1,0 @@
-
-{
-  "name": "Ars Controle",
-  "landing_text": "Research on spell control.",
-  "version": 1,
-  "extend": "ars_nouveau:worn_notebook"
-}

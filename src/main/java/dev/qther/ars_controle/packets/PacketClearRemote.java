@@ -1,18 +1,23 @@
 package dev.qther.ars_controle.packets;
 
+import com.hollingsworth.arsnouveau.common.network.AbstractPacket;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.ArsControle;
+import dev.qther.ars_controle.item.RemoteItem;
 import dev.qther.ars_controle.registry.ModRegistry;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
 
-import java.util.function.Supplier;
+public class PacketClearRemote extends AbstractPacket {
+    public static final Type<PacketClearRemote> TYPE = new Type<>(ArsControle.prefix("clear_remote"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, PacketClearRemote> CODEC = StreamCodec.ofMember(PacketClearRemote::toBytes, PacketClearRemote::new);
 
-public class PacketClearRemote {
     public PacketClearRemote() {
     }
 
@@ -22,28 +27,20 @@ public class PacketClearRemote {
     public void toBytes(FriendlyByteBuf buf) {
     }
 
-    public void handle(Supplier<NetworkEvent.Context> ctx) {
-        if (ctx.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            ctx.get().enqueueWork(() -> {
-                ServerPlayer player = ctx.get().getSender();
-                if (player == null) {
-                    return;
-                }
-                ItemStack stack = player.getMainHandItem();
-                if (stack.getItem() == ModRegistry.REMOTE.get()) {
-                    var tag = stack.getTag();
-                    if (tag == null) {
-                        stack.setTag(new CompoundTag());
-                        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.none"));
-                        return;
-                    }
-                    tag.remove("target");
-                    tag.remove("targetName");
-                    tag.remove("dimension");
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.none"));
-                }
-            });
+    @Override
+    public void onServerReceived(MinecraftServer minecraftServer, ServerPlayer player) {
+        if (player == null) {
+            return;
         }
-        ctx.get().setPacketHandled(true);
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() == ModRegistry.REMOTE.get()) {
+            stack.set(ModRegistry.REMOTE_DATA, RemoteItem.RemoteData.empty());
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.none"));
+        }
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

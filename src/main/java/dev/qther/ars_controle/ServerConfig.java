@@ -1,14 +1,14 @@
 package dev.qther.ars_controle;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig {
-    public final ForgeConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_MAX_SOURCE_COST;
-    public final ForgeConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_MIN_DISTANCE;
-    public final ForgeConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_PER_BLOCK;
-    public final ForgeConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_DIMENSION;
+    public final ModConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_MAX_SOURCE_COST;
+    public final ModConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_MIN_DISTANCE;
+    public final ModConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_PER_BLOCK;
+    public final ModConfigSpec.ConfigValue<Integer> WARPING_SPELL_PRISM_COST_DIMENSION;
 
-    ServerConfig(ForgeConfigSpec.Builder builder) {
+    ServerConfig(ModConfigSpec.Builder builder) {
         builder.comment("Config for Warping Spell Prism").push("warping_spell_prism");
         WARPING_SPELL_PRISM_MAX_SOURCE_COST = builder.comment("Max Source cost of Warping Spell Prism (1 Source Jar = 10000 Source)").define("max_cost", 5000);
         WARPING_SPELL_PRISM_COST_MIN_DISTANCE = builder.comment("The minimum distance before Warping Spell Prism costs Source").define("cost_min_distance", 128);
@@ -18,10 +18,10 @@ public class ServerConfig {
     }
 
     public static final ServerConfig SERVER;
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     static {
-        var pair = new ForgeConfigSpec.Builder().configure(ServerConfig::new);
+        var pair = new ModConfigSpec.Builder().configure(ServerConfig::new);
         SERVER = pair.getLeft();
         SPEC = pair.getRight();
     }

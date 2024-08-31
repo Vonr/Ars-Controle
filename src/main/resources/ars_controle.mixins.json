@@ -5,7 +5,6 @@
   "package": "dev.qther.ars_controle.mixin",
   "refmap": "ars_controle.refmap.json",
   "mixins": [
-    "LevelGetEntitiesAccessor"
   ],
   "client": [
   ],
