@@ -40,13 +40,13 @@ public class Cached {
 
     public static @Nullable Entity getEntityByUUID(@NotNull Iterable<ServerLevel> levels, @NotNull UUID uuid) {
         var cached = ENTITIES_BY_UUID.getIfPresent(uuid);
-        if (cached != null) {
+        if (cached != null && cached.isAlive()) {
             return cached;
         }
 
         for (var l : levels) {
             var entity = l.getEntities().get(uuid);
-            if (entity != null) {
+            if (entity != null && entity.isAlive()) {
                 ENTITIES_BY_UUID.put(uuid, entity);
                 return entity;
             }

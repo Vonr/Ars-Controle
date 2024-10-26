@@ -7,7 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.qther.ars_controle.Cached;
 import dev.qther.ars_controle.registry.ModRegistry;
-import dev.qther.ars_controle.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;

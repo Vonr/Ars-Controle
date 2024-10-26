@@ -1,0 +1,16 @@
+{
+  "category": "ars_nouveau:glyphs_1",
+  "icon": "ars_controle:glyph_filter_level",
+  "name": "ars_controle.glyph_name.glyph_filter_level",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "ars_controle.glyph_desc.glyph_filter_level"
+    },
+    {
+      "type": "ars_nouveau:glyph_recipe",
+      "recipe": "ars_controle:glyph_filter_level"
+    }
+  ],
+  "sortnum": 2
+}

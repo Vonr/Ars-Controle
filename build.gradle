@@ -62,6 +62,12 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    maven {
+        url "https://maven.squiddev.cc"
+        content {
+            includeGroup("cc.tweaked")
+        }
+    }
 }
 
 base {
@@ -131,6 +137,10 @@ dependencies {
     implementation "mezz.jei:jei-${project.mc_version}-neoforge:${project.jei_version}"
 
     implementation "top.theillusivec4.curios:curios-neoforge:${project.curios_version}+${project.mc_version}"
+
+    compileOnly "cc.tweaked:cc-tweaked-$project.mc_version-core-api:$project.cc_tweaked_version"
+    implementation "cc.tweaked:cc-tweaked-$project.mc_version-forge-api:$project.cc_tweaked_version"
+    implementation "cc.tweaked:cc-tweaked-$project.mc_version-forge:$project.cc_tweaked_version"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

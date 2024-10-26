@@ -5,7 +5,7 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
 import com.hollingsworth.arsnouveau.setup.registry.ItemRegistryWrapper;
 import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
 import dev.qther.ars_controle.item.RemoteItem;
-import dev.qther.ars_controle.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;

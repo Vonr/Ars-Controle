@@ -1,7 +1,10 @@
-package dev.qther.ars_controle;
+package dev.qther.ars_controle.registry;
 
 import com.hollingsworth.arsnouveau.api.registry.GlyphRegistry;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import dev.qther.ars_controle.spell.effect.EffectPreciseDelay;
+import dev.qther.ars_controle.spell.filter.FilterBinary;
+import dev.qther.ars_controle.spell.filter.FilterYLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +14,13 @@ public class ArsNouveauRegistry {
     public static List<AbstractSpellPart> registeredSpells = new ArrayList<>(); //this will come handy for datagen
 
     public static void registerGlyphs() {
-//        register(TestEffect.INSTANCE);
+        register(EffectPreciseDelay.INSTANCE);
+        register(FilterYLevel.ABOVE);
+        register(FilterYLevel.BELOW);
+        register(FilterYLevel.LEVEL);
+        register(FilterBinary.OR);
+        register(FilterBinary.XOR);
+        register(FilterBinary.XNOR);
     }
 
     public static void registerSounds() {

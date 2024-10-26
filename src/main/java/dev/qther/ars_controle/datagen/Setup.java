@@ -15,6 +15,7 @@ public class Setup {
         gen.addProvider(event.includeServer(), new ArsProviders.PatchouliProvider(gen));
 
         gen.addProvider(event.includeServer(), new BlockTagProvider(output, provider, fileHelper));
+        gen.addProvider(event.includeServer(), new BlockStateDatagen(output, fileHelper));
         gen.addProvider(event.includeServer(), new LootProvider(output, provider));
     }
 }

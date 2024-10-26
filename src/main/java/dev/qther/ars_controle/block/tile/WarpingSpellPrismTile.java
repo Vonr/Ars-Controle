@@ -1,4 +1,4 @@
-package dev.qther.ars_controle.tile;
+package dev.qther.ars_controle.block.tile;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -33,6 +34,10 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     public @Nullable HitResult getHitResult() {
+        if (level == null || level.isClientSide) {
+            return null;
+        }
+
         var blockPos = this.getBlock();
         if (blockPos != null) {
             var pos = blockPos.getCenter();
@@ -47,7 +52,7 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
             entity = Cached.getEntityByUUID(level.getServer().getAllLevels(), uuid);
         }
 
-        if (entity == null || !entity.isAlive()) {
+        if (entity == null) {
             return null;
         }
 
@@ -73,6 +78,10 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     public @Nullable ServerLevel getTargetLevel() {
+        if (level == null || level.isClientSide) {
+            return null;
+        }
+
         var tag = this.getPersistentData();
         if (this.getBlock() != null) {
             var s = tag.contains("dimension", 8) ? tag.getString("dimension") : null;
@@ -97,7 +106,11 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
 
     public void setEntityUUID(UUID uuid) {
         var tag = this.getPersistentData();
-        tag.putUUID("entity", uuid);
+        if (uuid == null) {
+            tag.remove("entity");
+        } else {
+            tag.putUUID("entity", uuid);
+        }
         tag.remove("block");
         this.setChanged();
     }
@@ -113,6 +126,10 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     public int getSourceRequired(HitResult hitResult) {
+        if (hitResult == null) {
+            return 0;
+        }
+
         double distSqr = 0;
         var dimCost = 0;
         if (hitResult instanceof BlockHitResult b) {
@@ -132,15 +149,18 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
         var costPerBlock = ServerConfig.SERVER.WARPING_SPELL_PRISM_COST_PER_BLOCK.get();
 
         if (distSqr > costMinDistanceSqr) {
-            var maxCost = ServerConfig.SERVER.WARPING_SPELL_PRISM_MAX_SOURCE_COST.get();
-            return (int) Math.min((double) maxCost, dimCost + Math.sqrt(distSqr - costMinDistanceSqr) * costPerBlock);
+            int maxCost = ServerConfig.SERVER.WARPING_SPELL_PRISM_MAX_SOURCE_COST.get();
+            if (maxCost < 0) {
+                maxCost = Integer.MAX_VALUE;
+            }
+            return Math.max(0, (int) Math.min(maxCost, dimCost + Math.sqrt(distSqr - costMinDistanceSqr) * costPerBlock));
         }
 
-        return dimCost;
+        return Math.max(0, dimCost);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         super.saveAdditional(tag, registries);
 
         var uuid = this.getEntityUUID();

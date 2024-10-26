@@ -16,9 +16,12 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.registry.ItemsRegistry;
 import com.mojang.serialization.JsonOps;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.ArsNouveauRegistry;
+import dev.qther.ars_controle.registry.ArsNouveauRegistry;
 import dev.qther.ars_controle.registry.ModNames;
 import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.spell.effect.EffectPreciseDelay;
+import dev.qther.ars_controle.spell.filter.FilterBinary;
+import dev.qther.ars_controle.spell.filter.FilterYLevel;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -45,13 +48,18 @@ public class ArsProviders {
         public void collectJsons(CachedOutput cache) {
             var output = this.generator.getPackOutput().getOutputFolder();
 
-//            recipes.add(get(TestEffect.INSTANCE).withItem(Items.DIRT));
+            recipes.add(get(EffectPreciseDelay.INSTANCE).withItem(ItemsRegistry.MANIPULATION_ESSENCE).withItem(Items.CLOCK).withItem(Items.COMPARATOR));
+            recipes.add(get(FilterYLevel.ABOVE).withItem(ItemsRegistry.ALLOW_ITEM_SCROLL).withItem(Items.FEATHER));
+            recipes.add(get(FilterYLevel.BELOW).withItem(ItemsRegistry.ALLOW_ITEM_SCROLL).withItem(Items.COBBLED_DEEPSLATE));
+            recipes.add(get(FilterYLevel.LEVEL).withItem(ItemsRegistry.ALLOW_ITEM_SCROLL).withItem(Items.SHORT_GRASS));
+            recipes.add(get(FilterBinary.OR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE));
+            recipes.add(get(FilterBinary.XOR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE_TORCH));
+            recipes.add(get(FilterBinary.XNOR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE).withItem(Items.REDSTONE_TORCH));
 
             for (var recipe : recipes) {
                 var path = getScribeGlyphPath(output, recipe.output.getItem());
                 saveStable(cache, GlyphRecipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow(), path);
             }
-
         }
 
         protected static Path getScribeGlyphPath(Path pathIn, Item glyph) {

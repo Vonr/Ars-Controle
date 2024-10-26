@@ -1,7 +1,9 @@
 package dev.qther.ars_controle;
 
+import dev.qther.ars_controle.cc.ArsControleCCCompat;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.packets.PacketClearRemote;
+import dev.qther.ars_controle.registry.ArsNouveauRegistry;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -11,13 +13,14 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(ArsControle.MODID)
 public class ArsControle {
     public static final String MODID = "ars_controle";
@@ -31,6 +34,7 @@ public class ArsControle {
         bus.addListener(Setup::gatherData);
         bus.addListener(ModNetworking::register);
         bus.addListener(this::doClientStuff);
+        bus.addListener(this::onRegisterCapabilities);
 
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
@@ -56,9 +60,14 @@ public class ArsControle {
         }
     }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Ars Controle says hello!");
+    }
+
+    public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
+            ArsControleCCCompat.register(event);
+        }
     }
 }

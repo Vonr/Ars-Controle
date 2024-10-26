@@ -6,14 +6,17 @@ import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SourceUtil;
 import com.hollingsworth.arsnouveau.common.advancement.ANCriteriaTriggers;
 import com.hollingsworth.arsnouveau.common.block.ModBlock;
+import com.hollingsworth.arsnouveau.common.entity.EntityFollowProjectile;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.ServerConfig;
+import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Player;
@@ -27,16 +30,12 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.NotNull;
 
 public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock, EntityBlock {
-    public WarpingSpellPrismBlock(Properties properties) {
-        super(properties);
-    }
-
     public WarpingSpellPrismBlock() {
         super();
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult _hr) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult _hr) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -47,12 +46,12 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         var te = level.getBlockEntity(pos);
         if (te == null) {
-            ArsControle.LOGGER.warn("No tile entity in scrying spell prism.");
+            ArsControle.LOGGER.warn("No tile entity in warping spell prism.");
             return InteractionResult.FAIL;
         }
 
         if (!(te instanceof WarpingSpellPrismTile tile)) {
-            ArsControle.LOGGER.warn("Wrong tile entity in scrying spell prism.");
+            ArsControle.LOGGER.warn("Wrong tile entity in warping spell prism.");
             return InteractionResult.FAIL;
         }
 
@@ -64,21 +63,23 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         }
 
         var hitResult = tile.getHitResult();
-        if (hitResult == null) {
-            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
-            return InteractionResult.SUCCESS;
-        }
-
-        if (hitResult instanceof EntityHitResult e) {
-            var entity = e.getEntity();
-            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.entity", entity.getDisplayName(), entity.level().dimension().location().toString()));
-            return InteractionResult.SUCCESS;
-        }
-
-        if (hitResult instanceof BlockHitResult b) {
-            var dim = tile.getTargetLevel();
-            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
-            return InteractionResult.SUCCESS;
+        switch (hitResult) {
+            case null -> {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
+                return InteractionResult.SUCCESS;
+            }
+            case EntityHitResult e -> {
+                var entity = e.getEntity();
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.entity", entity.getDisplayName(), entity.level().dimension().location().toString()));
+                return InteractionResult.SUCCESS;
+            }
+            case BlockHitResult b -> {
+                var dim = tile.getTargetLevel();
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
+                return InteractionResult.SUCCESS;
+            }
+            default -> {
+            }
         }
 
         return InteractionResult.PASS;
@@ -92,6 +93,11 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         }
 
         WarpingSpellPrismTile tile = (WarpingSpellPrismTile) world.getBlockEntity(pos);
+        if (tile == null) {
+            ArsControle.LOGGER.error("No tile entity in warping spell prism.");
+            return;
+        }
+
         var hit = tile.getHitResult();
         if (hit == null) {
             world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
@@ -100,7 +106,19 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         }
 
         var dim = tile.getTargetLevel();
-        if (dim == null || !dim.isLoaded(BlockPos.containing(hit.getLocation()))) {
+        if (dim == null) {
+            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            spell.remove(RemovalReason.DISCARDED);
+            return;
+        }
+
+        var hitPos = BlockPos.containing(hit.getLocation());
+        var chunk = dim.getChunkAt(hitPos);
+
+        var loadTime = ServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
+        if (loadTime > 0) {
+            dim.getChunkSource().addRegionTicket(TicketType.PORTAL, chunk.getPos(), 3, hitPos, true);
+        } else if (!dim.isLoaded(hitPos)) {
             world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
             spell.remove(RemovalReason.DISCARDED);
             return;
@@ -155,10 +173,39 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         spell.setPos(newPos);
 
         int manaCost = tile.getSourceRequired(hit);
-        if (manaCost > 0 && SourceUtil.takeSourceWithParticles(pos, world, 10, manaCost) == null) {
-            world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
-            spell.remove(RemovalReason.DISCARDED);
-            return;
+        if (manaCost > 0) {
+            var providers = SourceUtil.canTakeSource(pos, dim, 19);
+            var needed = manaCost;
+            for (var provider : providers) {
+                var source = Math.min(needed, provider.getSource().getSource());
+                if (source > 0) {
+                    needed -= source;
+                }
+                if (needed <= 0) {
+                    break;
+                }
+            }
+
+            if (needed > 0) {
+                world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
+                spell.remove(RemovalReason.DISCARDED);
+                return;
+            }
+
+            needed = manaCost;
+            for (var provider : providers) {
+                var source = Math.min(needed, provider.getSource().getSource());
+                if (source > 0) {
+                    provider.getSource().removeSource(source);
+                    needed -= source;
+
+                    EntityFollowProjectile aoeProjectile = new EntityFollowProjectile(dim, provider.getCurrentPos(), pos);
+                    dim.addFreshEntity(aoeProjectile);
+                }
+                if (needed <= 0) {
+                    break;
+                }
+            }
         }
 
         if (++spell.prismRedirect >= 3) {
