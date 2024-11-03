@@ -72,7 +72,7 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
         if (hit == null) {
             return null;
         }
-        var map = new Object2ObjectArrayMap<String, Object>();
+        var map = new Object2ObjectArrayMap<String, Object>(3);
 
         map.put("type", hit.getType().toString().toLowerCase(Locale.ENGLISH));
         var loc = hit.getLocation();
@@ -80,13 +80,13 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
 
         if (hit instanceof BlockHitResult bhr) {
             var bp = bhr.getBlockPos();
-            var inner = new Object2ObjectArrayMap<String, Object>();
+            var inner = new Object2ObjectArrayMap<String, Object>(2);
             inner.put("pos", ArsControleCCCompat.blockPosToMap(bp));
             inner.put("level", this.owner.getTargetLevel().dimension().location().toString());
             map.put("block", inner);
         } else if (hit instanceof EntityHitResult ehr) {
             var e = ehr.getEntity();
-            var inner = new Object2ObjectArrayMap<String, Object>();
+            var inner = new Object2ObjectArrayMap<String, Object>(11);
             inner.put("type", BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
             inner.put("name", e.getName().getString());
             inner.put("pos", ArsControleCCCompat.vecToMap(e.getPosition(1.0f)));
@@ -99,11 +99,12 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
                 inner.put("health", le.getHealth());
                 inner.put("absorption", le.getAbsorptionAmount());
 
-                var effects = new Object2IntArrayMap<String>();
-                for (var effect : le.getActiveEffects()) {
-                    effects.put(effect.getDescriptionId(), effect.getAmplifier());
+                var effectList = le.getActiveEffects();
+                var effectMap = new Object2IntArrayMap<String>(effectList.size());
+                for (var effect : effectList) {
+                    effectMap.put(effect.getDescriptionId(), effect.getAmplifier());
                 }
-                inner.put("effects", effects);
+                inner.put("effects", effectMap);
             }
             map.put("entity", inner);
         }

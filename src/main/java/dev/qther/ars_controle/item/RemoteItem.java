@@ -179,7 +179,7 @@ public class RemoteItem extends ModItem {
 
                 tile.setEntityUUID(entity.getUUID());
 
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName().getString(), level.dimension().location().toString()));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), level.dimension().location().toString()));
 
                 return InteractionResult.SUCCESS;
             }
@@ -200,7 +200,7 @@ public class RemoteItem extends ModItem {
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 wandable.onFinishedConnectionLast(null, null, entity, player);
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName().getString(), level.dimension().location().toString()));
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), level.dimension().location().toString()));
                 return InteractionResult.SUCCESS;
             }
         }

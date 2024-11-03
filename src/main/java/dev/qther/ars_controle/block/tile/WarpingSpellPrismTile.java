@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.Cached;
-import dev.qther.ars_controle.ServerConfig;
+import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

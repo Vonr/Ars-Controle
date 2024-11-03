@@ -1,6 +1,9 @@
 package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
+import dev.qther.ars_controle.config.ClientConfig;
+import dev.qther.ars_controle.config.ConfigHelper;
+import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.packets.PacketClearRemote;
 import dev.qther.ars_controle.registry.ArsNouveauRegistry;
@@ -15,6 +18,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -36,7 +40,10 @@ public class ArsControle {
         bus.addListener(this::doClientStuff);
         bus.addListener(this::onRegisterCapabilities);
 
+        container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+
+        container.registerExtensionPoint(IConfigScreenFactory.class, new ConfigHelper.ConfigScreenFactory());
 
         NeoForge.EVENT_BUS.register(this);
     }

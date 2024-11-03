@@ -10,7 +10,7 @@ import com.hollingsworth.arsnouveau.common.entity.EntityFollowProjectile;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.ServerConfig;
+import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;

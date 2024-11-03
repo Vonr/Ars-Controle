@@ -12,6 +12,7 @@ import com.hollingsworth.arsnouveau.common.datagen.ApparatusRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.GlyphRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.ImbuementRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.patchouli.*;
+import com.hollingsworth.arsnouveau.common.spell.augment.AugmentRandomize;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.registry.ItemsRegistry;
 import com.mojang.serialization.JsonOps;
@@ -21,6 +22,8 @@ import dev.qther.ars_controle.registry.ModNames;
 import dev.qther.ars_controle.registry.ModRegistry;
 import dev.qther.ars_controle.spell.effect.EffectPreciseDelay;
 import dev.qther.ars_controle.spell.filter.FilterBinary;
+import dev.qther.ars_controle.spell.filter.FilterRandom;
+import dev.qther.ars_controle.spell.filter.FilterUnary;
 import dev.qther.ars_controle.spell.filter.FilterYLevel;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -55,6 +58,8 @@ public class ArsProviders {
             recipes.add(get(FilterBinary.OR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE));
             recipes.add(get(FilterBinary.XOR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE_TORCH));
             recipes.add(get(FilterBinary.XNOR).withItem(Items.COMPARATOR).withItem(Items.REDSTONE).withItem(Items.REDSTONE_TORCH));
+            recipes.add(get(FilterUnary.NOT).withItem(ItemsRegistry.ALLOW_ITEM_SCROLL).withItem(Items.REDSTONE_TORCH));
+            recipes.add(get(FilterRandom.INSTANCE).withItem(ItemsRegistry.ALLOW_ITEM_SCROLL).withItem(AugmentRandomize.INSTANCE.getGlyph()));
 
             for (var recipe : recipes) {
                 var path = getScribeGlyphPath(output, recipe.output.getItem());

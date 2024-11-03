@@ -13,4 +13,6 @@ public class ModNames {
     public static final String GLYPH_FILTER_OR = GlyphLib.prependGlyph("filter_or");
     public static final String GLYPH_FILTER_XOR = GlyphLib.prependGlyph("filter_xor");
     public static final String GLYPH_FILTER_XNOR = GlyphLib.prependGlyph("filter_xnor");
+    public static final String GLYPH_FILTER_NOT = GlyphLib.prependGlyph("filter_not");
+    public static final String GLYPH_FILTER_RANDOM = GlyphLib.prependGlyph("filter_random");
 }

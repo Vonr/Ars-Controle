@@ -2,6 +2,7 @@ package dev.qther.ars_controle;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceArrayMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -9,12 +10,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class Cached {
-    public static final Map<String, WeakReference<ServerLevel>> LEVELS_BY_NAME = new HashMap<>(8);
+    public static final Map<String, WeakReference<ServerLevel>> LEVELS_BY_NAME = new Object2ReferenceArrayMap<>(8);
 
     public static @Nullable ServerLevel getLevelByName(@NotNull Iterable<ServerLevel> levels, @NotNull String name) {
         if (LEVELS_BY_NAME.containsKey(name)) {

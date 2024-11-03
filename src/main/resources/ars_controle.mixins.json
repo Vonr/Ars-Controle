@@ -3,13 +3,14 @@
   "minVersion": "0.8.3",
   "compatibilityLevel": "JAVA_17",
   "package": "dev.qther.ars_controle.mixin",
-  "refmap": "ars_controle.refmap.json",
   "plugin": "dev.qther.ars_controle.mixin.ArsControleMixinPlugin",
   "mixins": [
     "EventQueueMixin",
     "StandardSpellValidatorMixin"
   ],
   "client": [
+    "enhanced_spellbook_controls.GuiSpellBookMixin",
+    "enhanced_spellbook_controls.ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -4,6 +4,8 @@ import com.hollingsworth.arsnouveau.api.registry.GlyphRegistry;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import dev.qther.ars_controle.spell.effect.EffectPreciseDelay;
 import dev.qther.ars_controle.spell.filter.FilterBinary;
+import dev.qther.ars_controle.spell.filter.FilterRandom;
+import dev.qther.ars_controle.spell.filter.FilterUnary;
 import dev.qther.ars_controle.spell.filter.FilterYLevel;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class ArsNouveauRegistry {
         register(FilterBinary.OR);
         register(FilterBinary.XOR);
         register(FilterBinary.XNOR);
+        register(FilterUnary.NOT);
+        register(FilterRandom.INSTANCE);
     }
 
     public static void registerSounds() {
