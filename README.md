@@ -6,8 +6,7 @@ Addon for Ars Nouveau focused on increasing control.
 
 ### Warping Spell Prism ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/warping_spell_prism.png?raw=true)
 
-The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions -
-as long as both the prism and the destination are loaded.
+The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions!
 
 ### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
 
@@ -41,6 +40,7 @@ Filter: XNOR ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resourc
 ### Other Glyphs
 
 #### Y-Level Filters
+
 Filter: Above ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/glyph_filter_above.png?raw=true)
 - Only resolves the spell above the caster.
 
@@ -52,6 +52,8 @@ Filter: Below ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resour
 
 Filter: Random ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/glyph_filter_random.png?raw=true)  
 - Has a base 50% chance of resolving. If amplified overall, chance will be `(100% - 50% / (2 ^ Amplification))`. If dampened overall, chance will be `(50% / (2 ^ Dampening))`
+
+#### Effect Glyphs
 
 Precise Delay ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/glyph_precise_delay.png?raw=true)  
 - Delays the remainder of the spell by (2 ^ Extend Time Augments) ticks
