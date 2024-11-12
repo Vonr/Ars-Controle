@@ -56,7 +56,7 @@ Filter: Random ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resou
 #### Effect Glyphs
 
 Precise Delay ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/glyph_precise_delay.png?raw=true)  
-- Delays the remainder of the spell by (2 ^ Extend Time Augments) ticks
+- Delays the remainder of the spell by `(2 ^ Extend Time Augments)` ticks
 
 ### Spell Book Control Improvements
 
