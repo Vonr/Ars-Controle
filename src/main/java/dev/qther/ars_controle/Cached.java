@@ -36,7 +36,7 @@ public class Cached {
         return null;
     }
 
-    public static final Cache<UUID, Entity> ENTITIES_BY_UUID = CacheBuilder.newBuilder().weakValues().expireAfterAccess(Duration.ofMinutes(30)).initialCapacity(8).build();
+    public static final Cache<UUID, Entity> ENTITIES_BY_UUID = CacheBuilder.newBuilder().weakValues().expireAfterAccess(Duration.ofMinutes(10)).initialCapacity(8).build();
 
     public static @Nullable Entity getEntityByUUID(@NotNull Iterable<ServerLevel> levels, @NotNull UUID uuid) {
         var cached = ENTITIES_BY_UUID.getIfPresent(uuid);

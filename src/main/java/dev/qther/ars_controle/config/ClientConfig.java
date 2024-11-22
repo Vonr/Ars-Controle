@@ -1,10 +1,7 @@
 package dev.qther.ars_controle.config;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientConfig {
     public final ModConfigSpec.BooleanValue AUTOFOCUS_SEARCH;
     public final ModConfigSpec.BooleanValue CLEAR_SEARCH_ON_AUTOFOCUS;

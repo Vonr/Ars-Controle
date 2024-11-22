@@ -41,12 +41,10 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
         return false;
     }
 
-    @LuaFunction(mainThread = true)
     public final void setTarget(BlockPos pos) {
         this.owner.setBlock(this.owner.getLevel().dimension(), pos);
     }
 
-    @LuaFunction(mainThread = true)
     public final void setTarget(String level, BlockPos pos) throws LuaException {
         var l = Cached.getLevelByName(this.owner.getLevel().getServer().getAllLevels(), level);
         if (l == null) {
@@ -56,7 +54,7 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
     }
 
     @LuaFunction(mainThread = true)
-    public final void setTarget(String level, int x, int y, int z) throws LuaException {
+    public final void setTargetWithLevel(String level, int x, int y, int z) throws LuaException {
         this.setTarget(level, new BlockPos(x, y, z));
     }
 
@@ -91,7 +89,6 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
             inner.put("name", e.getName().getString());
             inner.put("pos", ArsControleCCCompat.vecToMap(e.getPosition(1.0f)));
             inner.put("eyePos", ArsControleCCCompat.vecToMap(e.getEyePosition()));
-            inner.put("onFire", e.isOnFire());
             inner.put("level", e.level().dimension().location().toString());
             inner.put("yaw", Mth.wrapDegrees(e.getYRot()));
             inner.put("pitch", Mth.wrapDegrees(e.getXRot()));

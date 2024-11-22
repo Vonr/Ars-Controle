@@ -3,7 +3,9 @@ package dev.qther.ars_controle.registry;
 import com.hollingsworth.arsnouveau.setup.registry.BlockEntityTypeRegistryWrapper;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
 import com.hollingsworth.arsnouveau.setup.registry.ItemRegistryWrapper;
+import dev.qther.ars_controle.block.ScryersLinkageBlock;
 import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
+import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
 import dev.qther.ars_controle.item.RemoteItem;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.component.DataComponentType;
@@ -41,6 +43,10 @@ public class ModRegistry {
     public static BlockRegistryWrapper<WarpingSpellPrismBlock> WARPING_SPELL_PRISM_BLOCK = new BlockRegistryWrapper<>(BLOCKS.register(ModNames.WARPING_SPELL_PRISM, (block) -> new WarpingSpellPrismBlock()));
     public static BlockEntityTypeRegistryWrapper<WarpingSpellPrismTile> WARPING_SPELL_PRISM_TILE = new BlockEntityTypeRegistryWrapper<>(TILES.register(ModNames.WARPING_SPELL_PRISM, () -> BlockEntityType.Builder.of(WarpingSpellPrismTile::new, WARPING_SPELL_PRISM_BLOCK.get()).build(null)));
     public static ItemRegistryWrapper<Item> WARPING_SPELL_PRISM_ITEM = new ItemRegistryWrapper<>(ITEMS.register(ModNames.WARPING_SPELL_PRISM, () -> getDefaultBlockItem(WARPING_SPELL_PRISM_BLOCK.get())));
+
+    public static BlockRegistryWrapper<ScryersLinkageBlock> SCRYERS_LINKAGE_BLOCK = new BlockRegistryWrapper<>(BLOCKS.register(ModNames.SCRYERS_LINKAGE, (block) -> new ScryersLinkageBlock()));
+    public static BlockEntityTypeRegistryWrapper<ScryersLinkageTile> SCRYERS_LINKAGE_TILE = new BlockEntityTypeRegistryWrapper<>(TILES.register(ModNames.SCRYERS_LINKAGE, () -> BlockEntityType.Builder.of(ScryersLinkageTile::new, SCRYERS_LINKAGE_BLOCK.get()).build(null)));
+    public static ItemRegistryWrapper<Item> SCRYERS_LINKAGE_ITEM = new ItemRegistryWrapper<>(ITEMS.register(ModNames.SCRYERS_LINKAGE, () -> getDefaultBlockItem(SCRYERS_LINKAGE_BLOCK.get())));
 
     public static ItemRegistryWrapper<Item> REMOTE = new ItemRegistryWrapper<>(ITEMS.register(ModNames.REMOTE, RemoteItem::new));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<RemoteItem.RemoteData>> REMOTE_DATA = DATA.register("remote_data",

@@ -93,6 +93,13 @@ public class ArsProviders {
                     .build());
 
             addRecipe(builder()
+                    .withResult(ModRegistry.SCRYERS_LINKAGE_ITEM)
+                    .withReagent(BlockRegistry.SCRYERS_CRYSTAL)
+                    .withPedestalItem(4, Ingredient.of(Tags.Items.ENDER_PEARLS))
+                    .withPedestalItem(4, Ingredient.of(Items.POPPED_CHORUS_FRUIT))
+                    .build());
+
+            addRecipe(builder()
                     .withResult(ModRegistry.REMOTE)
                     .withReagent(ItemsRegistry.DOMINION_ROD)
                     .withPedestalItem(4, Ingredient.of(Tags.Items.ENDER_PEARLS))
@@ -169,6 +176,13 @@ public class ArsProviders {
                             .withPage(new ApparatusPage(ModRegistry.WARPING_SPELL_PRISM_ITEM))
                             .withPage(new RelationsPage().withEntry(AUTOMATION, "spell_prism")),
                     getPath(AUTOMATION, ModNames.WARPING_SPELL_PRISM));
+
+            addPage(new PatchouliBuilder(AUTOMATION, ModRegistry.SCRYERS_LINKAGE_ITEM.get())
+                            .withName("ars_controle.page.scryers_linkage")
+                            .withIcon(ModRegistry.SCRYERS_LINKAGE_ITEM.get())
+                            .withTextPage("ars_controle.page1.scryers_linkage")
+                            .withPage(new ApparatusPage(ModRegistry.SCRYERS_LINKAGE_ITEM)),
+                    getPath(AUTOMATION, ModNames.SCRYERS_LINKAGE));
 
             addPage(new PatchouliBuilder(AUTOMATION, ModRegistry.REMOTE.get())
                             .withName("ars_controle.page.remote")

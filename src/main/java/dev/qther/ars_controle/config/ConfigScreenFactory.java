@@ -1,14 +1,11 @@
 package dev.qther.ars_controle.config;
 
 import net.minecraft.client.gui.screens.Screen;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.jetbrains.annotations.NotNull;
 
-@OnlyIn(Dist.CLIENT)
 public final class ConfigScreenFactory implements IConfigScreenFactory {
     @Override
     public @NotNull Screen createScreen(@NotNull ModContainer modContainer, @NotNull Screen screen) {

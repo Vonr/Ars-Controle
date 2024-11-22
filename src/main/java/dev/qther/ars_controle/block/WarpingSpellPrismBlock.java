@@ -2,6 +2,7 @@ package dev.qther.ars_controle.block;
 
 import com.hollingsworth.arsnouveau.api.block.IPrismaticBlock;
 import com.hollingsworth.arsnouveau.api.event.SpellProjectileHitEvent;
+import com.hollingsworth.arsnouveau.api.util.ANEventBus;
 import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SourceUtil;
 import com.hollingsworth.arsnouveau.common.advancement.ANCriteriaTriggers;
@@ -10,8 +11,8 @@ import com.hollingsworth.arsnouveau.common.entity.EntityFollowProjectile;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.config.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -20,6 +21,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,7 +29,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Comparator;
 
 public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock, EntityBlock {
     public WarpingSpellPrismBlock() {
@@ -40,7 +45,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             return InteractionResult.SUCCESS;
         }
 
-        if (!state.canEntityDestroy(level, pos, player)) {
+        if (ANEventBus.post(new BlockEvent.BreakEvent(level, pos, state, player))) {
             return InteractionResult.FAIL;
         }
 
@@ -113,15 +118,22 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         }
 
         var hitPos = BlockPos.containing(hit.getLocation());
-        var chunk = dim.getChunkAt(hitPos);
-
-        var loadTime = ServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
-        if (loadTime > 0) {
-            dim.getChunkSource().addRegionTicket(TicketType.PORTAL, chunk.getPos(), 3, hitPos, true);
-        } else if (!dim.isLoaded(hitPos)) {
-            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
-            spell.remove(RemovalReason.DISCARDED);
-            return;
+        if (!dim.isLoaded(hitPos)) {
+            int loadTime = ServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
+            if (loadTime > 0) {
+                var loadPos = new ChunkPos(hitPos);
+                dim.getChunkSource().addRegionTicket(
+                        TicketType.create("warping_spell_prism", Comparator.comparingLong(ChunkPos::toLong), loadTime),
+                        loadPos,
+                        3,
+                        loadPos,
+                        true
+                );
+            } else {
+                world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+                spell.remove(RemovalReason.DISCARDED);
+                return;
+            }
         }
 
         var oldLevel = spell.level();
@@ -174,7 +186,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         int manaCost = tile.getSourceRequired(hit);
         if (manaCost > 0) {
-            var providers = SourceUtil.canTakeSource(pos, dim, 19);
+            var providers = SourceUtil.canTakeSource(pos, world, 19);
             var needed = manaCost;
             for (var provider : providers) {
                 var source = Math.min(needed, provider.getSource().getSource());
@@ -199,8 +211,8 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
                     provider.getSource().removeSource(source);
                     needed -= source;
 
-                    EntityFollowProjectile aoeProjectile = new EntityFollowProjectile(dim, provider.getCurrentPos(), pos);
-                    dim.addFreshEntity(aoeProjectile);
+                    EntityFollowProjectile aoeProjectile = new EntityFollowProjectile(world, provider.getCurrentPos(), pos);
+                    world.addFreshEntity(aoeProjectile);
                 }
                 if (needed <= 0) {
                     break;

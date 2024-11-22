@@ -8,6 +8,14 @@ Addon for Ars Nouveau focused on increasing control.
 
 The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions!
 
+### Scryer's Linkage
+
+The Scryer's Linkage links to another block, allowing machines to interact with its linked block from distance places.
+
+It is capable of linking items, liquids, energy, redstone, and a few other things.
+
+To configure it, use a Dominion Wand first on the block you want to link to, then the linkage.
+
 ### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
 
 The Remote is an item that lets you remotely configure blocks such as the Warping Spell Prism and Storage Lectern.

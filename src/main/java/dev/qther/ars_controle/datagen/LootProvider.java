@@ -2,7 +2,6 @@ package dev.qther.ars_controle.datagen;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
-import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
 import dev.qther.ars_controle.registry.ModRegistry;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.HolderLookup;
@@ -39,6 +38,7 @@ public class LootProvider extends LootTableProvider {
         @Override
         protected void generate() {
             registerDropSelf(ModRegistry.WARPING_SPELL_PRISM_BLOCK);
+            registerDropSelf(ModRegistry.SCRYERS_LINKAGE_BLOCK);
         }
 
         @Override
@@ -61,7 +61,7 @@ public class LootProvider extends LootTableProvider {
             }
         }
 
-        public void registerDropSelf(BlockRegistryWrapper<WarpingSpellPrismBlock> block) {
+        public void registerDropSelf(BlockRegistryWrapper<? extends Block> block) {
             list.add(block.get());
             dropSelf(block.get());
         }

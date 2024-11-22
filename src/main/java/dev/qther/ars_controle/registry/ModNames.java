@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.common.lib.GlyphLib;
 
 public class ModNames {
     public static final String WARPING_SPELL_PRISM = "warping_spell_prism";
+    public static final String SCRYERS_LINKAGE = "scryers_linkage";
     public static final String REMOTE = "remote";
 
     public static final String GLYPH_PRECISE_DELAY = GlyphLib.prependGlyph("precise_delay");

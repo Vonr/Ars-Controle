@@ -5,8 +5,10 @@
   "package": "dev.qther.ars_controle.mixin",
   "plugin": "dev.qther.ars_controle.mixin.ArsControleMixinPlugin",
   "mixins": [
+    "ComparatorBlockMixin",
     "EventQueueMixin",
-    "StandardSpellValidatorMixin"
+    "StandardSpellValidatorMixin",
+    "cross_dim_fixes.EffectBlinkMixin"
   ],
   "client": [
     "enhanced_spellbook_controls.GuiSpellBookMixin",

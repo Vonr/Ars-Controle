@@ -20,7 +20,7 @@ public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
 
     @Override
     protected void addTags(HolderLookup.@NotNull Provider pProvider) {
-        this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get());
+        this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get(), ModRegistry.SCRYERS_LINKAGE_BLOCK.get());
     }
 
     public @NotNull String getName() {

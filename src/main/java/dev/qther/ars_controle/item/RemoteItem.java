@@ -1,13 +1,15 @@
 package dev.qther.ars_controle.item;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
+import com.hollingsworth.arsnouveau.api.util.ANEventBus;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.qther.ars_controle.Cached;
-import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,10 +21,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -30,7 +32,7 @@ import java.util.UUID;
 
 public class RemoteItem extends ModItem {
     public RemoteItem() {
-        super(new Item.Properties().stacksTo(1));
+        super(new Properties().stacksTo(1));
     }
 
     @Override
@@ -56,7 +58,12 @@ public class RemoteItem extends ModItem {
         var stack = ctx.getItemInHand();
 
         var blockPos = ctx.getClickedPos();
-        var block = level.getBlockState(blockPos).getBlock();
+        var state = level.getBlockState(blockPos);
+        var block = state.getBlock();
+
+        if (ANEventBus.post(new BlockEvent.BreakEvent(level, blockPos, state, player))) {
+            return InteractionResult.FAIL;
+        }
 
         var data = RemoteData.fromItemStack(stack);
         if (data.isEmpty()) {
@@ -86,43 +93,40 @@ public class RemoteItem extends ModItem {
                 return InteractionResult.FAIL;
             }
 
-            var targetBlock = targetLevel.getBlockState(targetPos);
-            if (targetBlock.is(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get())) {
-                var _tile = targetLevel.getBlockEntity(targetPos);
-                if (_tile == null) {
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
+            switch (targetLevel.getBlockEntity(targetPos)) {
+                case WarpingSpellPrismTile tile -> {
+                    tile.setBlock(level.dimension(), blockPos);
+                    PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
+                    return InteractionResult.CONSUME;
                 }
-                if (!(_tile instanceof WarpingSpellPrismTile tile)) {
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
+                case ScryersLinkageTile tile -> {
+                    if (tile.setBlock(level, blockPos)) {
+                        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
+                    } else {
+                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
+                    }
+                    return InteractionResult.CONSUME;
                 }
-
-                tile.setBlock(level.dimension(), blockPos);
-
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
-
-                return InteractionResult.SUCCESS;
+                case null, default -> {
+                }
             }
 
             if (!level.dimension().equals(data.block.get().dimension())) {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.different_dimension"));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.FAIL;
             }
 
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
                 wandable.onFinishedConnectionLast(blockPos, null, null, player);
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", data.block.get().pos().toShortString(), data.block.get().dimension().location().toString()));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 wandable.onFinishedConnectionLast(blockPos, null, null, player);
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
         }
 
@@ -144,7 +148,7 @@ public class RemoteItem extends ModItem {
                     RemoteData.fromEntity(entity).write(stack);
                     PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", entity.getDisplayName(), level.dimension().location().toString()));
 
-                    return InteractionResult.SUCCESS;
+                    return InteractionResult.CONSUME;
                 }
 
                 return InteractionResult.PASS;
@@ -181,7 +185,7 @@ public class RemoteItem extends ModItem {
 
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), level.dimension().location().toString()));
 
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
 
             if (!level.dimension().equals(data.block.get().dimension())) {
@@ -192,16 +196,14 @@ public class RemoteItem extends ModItem {
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
                 wandable.onFinishedConnectionLast(null, null, entity, player);
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", data.block.get().pos().toShortString(), data.block.get().dimension().location().toString()));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 wandable.onFinishedConnectionLast(null, null, entity, player);
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), level.dimension().location().toString()));
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
         }
 

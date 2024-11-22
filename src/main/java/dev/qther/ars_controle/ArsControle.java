@@ -1,7 +1,6 @@
 package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
-import dev.qther.ars_controle.config.ClientConfig;
 import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.registry.ArsNouveauRegistry;
@@ -13,6 +12,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,26 @@ public class ArsControle {
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
             ArsControleCCCompat.register(event);
+        }
+
+        for (var erasedCap : BlockCapability.getAll()) {
+            try {
+                var cap = (BlockCapability<Object, Object>) erasedCap;
+
+                event.registerBlockEntity(cap, ModRegistry.SCRYERS_LINKAGE_TILE.get(), (linkage, context) -> {
+                    var info = linkage.getTargetInfo();
+                    if (info == null) {
+                        return null;
+                    }
+
+                    var level = info.first();
+                    var block = info.second();
+
+                    return level.getCapability(cap, block, context);
+                });
+            } catch (ClassCastException e) {
+                LOGGER.error("Could not register capability for linkage", e);
+            }
         }
     }
 }
