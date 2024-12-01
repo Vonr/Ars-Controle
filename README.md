@@ -16,6 +16,15 @@ It is capable of linking items, liquids, energy, redstone, and a few other thing
 
 To configure it, use a Dominion Wand first on the block you want to link to, then the linkage.
 
+# Temporal Stability Sensor ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/temporal_stability_sensor.png?raw=true)
+
+The Temporal Stability Sensor shows how unstable the time of the world is. 
+
+Using a comparator, you can find out how close the world is to lagging, 
+with higher redstone output meaning the world is closer to lagging. 
+
+You can use this to turn off farms automatically to prevent the server from lagging.
+
 ### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
 
 The Remote is an item that lets you remotely configure blocks such as the Warping Spell Prism and Storage Lectern.
@@ -25,7 +34,7 @@ Then, you can use it again on other blocks or entities depending on what the blo
 To clear its configuration target, left click on air while holding the remote.
 
 The remote will allow for cross dimensional configuration of the Warping Spell Prism, unlike the Dominion Wand
-which does not store dimensions.
+which does not store dimensions. (Dominion wands can now configure cross-dimensionally in Ars Nouveau 5.3.2 and higher)
 
 ### Adaptive Filters
 
