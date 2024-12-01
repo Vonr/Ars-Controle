@@ -2,9 +2,6 @@ package dev.qther.ars_controle.mixin;
 
 import dev.qther.ars_controle.ArsControle;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -32,22 +29,22 @@ public class ArsControleMixinPlugin implements IMixinConfigPlugin {
         }
 
         var mods = FMLLoader.getLoadingModList().getMods();
-        if (mixinClassName.endsWith("EventQueueMixin")) {
-            var version = mods.stream().filter(m -> m.getModId().equals("ars_nouveau")).map(ModInfo::getVersion).findAny();
-            if (version.isEmpty()) {
-                return false;
-            }
-            try {
-                if (!VersionRange.createFromVersionSpec("(,5.2.0]").containsVersion(version.get())) {
-                    ArsControle.LOGGER.info("Skipping EventQueue fixes for ars_nouveau < 5.2.0");
-                    return false;
-                } else {
-                    ArsControle.LOGGER.info("Applying EventQueue fixes for ars_nouveau < 5.2.0");
-                }
-            } catch (InvalidVersionSpecificationException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        if (mixinClassName.endsWith("EventQueueMixin")) {
+//            var version = mods.stream().filter(m -> m.getModId().equals("ars_nouveau")).map(ModInfo::getVersion).findAny();
+//            if (version.isEmpty()) {
+//                return false;
+//            }
+//            try {
+//                if (!VersionRange.createFromVersionSpec("(,5.2.0]").containsVersion(version.get())) {
+//                    ArsControle.LOGGER.info("Skipping EventQueue fixes for ars_nouveau < 5.2.0");
+//                    return false;
+//                } else {
+//                    ArsControle.LOGGER.info("Applying EventQueue fixes for ars_nouveau < 5.2.0");
+//                }
+//            } catch (InvalidVersionSpecificationException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
         return true;
     }

@@ -1,0 +1,15 @@
+{
+  "category": "ars_nouveau:automation",
+  "icon": "ars_controle:temporal_stability_sensor",
+  "name": "ars_controle.page.temporal_stability_sensor",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "ars_controle.page1.temporal_stability_sensor"
+    },
+    {
+      "type": "ars_nouveau:apparatus_recipe",
+      "recipe": "ars_controle:temporal_stability_sensor"
+    }
+  ]
+}

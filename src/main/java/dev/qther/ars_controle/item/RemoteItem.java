@@ -7,8 +7,6 @@ import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.qther.ars_controle.Cached;
-import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
-import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
@@ -82,50 +80,27 @@ public class RemoteItem extends ModItem {
             return InteractionResult.FAIL;
         }
 
+        var server = level.getServer();
         if (data.block.isPresent()) {
             var globalPos = data.block.get();
             var targetPos = globalPos.pos();
             var targetDim = globalPos.dimension();
 
-            var targetLevel = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim.location().toString());
+            var targetLevel = Cached.getLevelByName(server.getAllLevels(), targetDim.location().toString());
             if (targetLevel == null) {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
                 return InteractionResult.FAIL;
             }
 
-            switch (targetLevel.getBlockEntity(targetPos)) {
-                case WarpingSpellPrismTile tile -> {
-                    tile.setBlock(level.dimension(), blockPos);
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
-                    return InteractionResult.CONSUME;
-                }
-                case ScryersLinkageTile tile -> {
-                    if (tile.setBlock(level, blockPos)) {
-                        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", blockPos.toShortString(), level.dimension().location().toString()));
-                    } else {
-                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-                    }
-                    return InteractionResult.CONSUME;
-                }
-                case null, default -> {
-                }
-            }
-
-            if (!level.dimension().equals(data.block.get().dimension())) {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.different_dimension"));
-                return InteractionResult.FAIL;
-            }
-
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(blockPos, null, null, player);
+                wandable.onFinishedConnectionLast(new GlobalPos(level.dimension(), blockPos), null, null, player);
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
-            var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(blockPos, null, null, player);
+                wandable.onFinishedConnectionLast(new GlobalPos(level.dimension(), blockPos), null, null, player);
                 return InteractionResult.CONSUME;
             }
         }
@@ -169,40 +144,16 @@ public class RemoteItem extends ModItem {
                 return InteractionResult.FAIL;
             }
 
-            var targetBlock = targetLevel.getBlockState(targetPos);
-            if (targetBlock.is(ModRegistry.WARPING_SPELL_PRISM_BLOCK.get())) {
-                var _tile = targetLevel.getBlockEntity(targetPos);
-                if (_tile == null) {
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-                if (!(_tile instanceof WarpingSpellPrismTile tile)) {
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-                    return InteractionResult.FAIL;
-                }
-
-                tile.setEntityUUID(entity.getUUID());
-
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", entity.getDisplayName(), level.dimension().location().toString()));
-
-                return InteractionResult.CONSUME;
-            }
-
-            if (!level.dimension().equals(data.block.get().dimension())) {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.different_dimension"));
-                return InteractionResult.FAIL;
-            }
-
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(null, null, entity, player);
+                wandable.onFinishedConnectionLast((GlobalPos) null, null, entity, player);
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(null, null, entity, player);
+                wandable.onFinishedConnectionLast((GlobalPos) null, null, entity, player);
                 return InteractionResult.CONSUME;
             }
         }

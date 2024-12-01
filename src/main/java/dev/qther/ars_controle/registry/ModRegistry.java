@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockEntityTypeRegistryWrappe
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
 import com.hollingsworth.arsnouveau.setup.registry.ItemRegistryWrapper;
 import dev.qther.ars_controle.block.ScryersLinkageBlock;
+import dev.qther.ars_controle.block.TemporalStabilitySensorBlock;
 import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
 import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
 import dev.qther.ars_controle.item.RemoteItem;
@@ -47,6 +48,9 @@ public class ModRegistry {
     public static BlockRegistryWrapper<ScryersLinkageBlock> SCRYERS_LINKAGE_BLOCK = new BlockRegistryWrapper<>(BLOCKS.register(ModNames.SCRYERS_LINKAGE, (block) -> new ScryersLinkageBlock()));
     public static BlockEntityTypeRegistryWrapper<ScryersLinkageTile> SCRYERS_LINKAGE_TILE = new BlockEntityTypeRegistryWrapper<>(TILES.register(ModNames.SCRYERS_LINKAGE, () -> BlockEntityType.Builder.of(ScryersLinkageTile::new, SCRYERS_LINKAGE_BLOCK.get()).build(null)));
     public static ItemRegistryWrapper<Item> SCRYERS_LINKAGE_ITEM = new ItemRegistryWrapper<>(ITEMS.register(ModNames.SCRYERS_LINKAGE, () -> getDefaultBlockItem(SCRYERS_LINKAGE_BLOCK.get())));
+
+    public static BlockRegistryWrapper<TemporalStabilitySensorBlock> TEMPORAL_STABILITY_SENSOR = new BlockRegistryWrapper<>(BLOCKS.register(ModNames.TEMPORAL_STABILITY_SENSOR, (block) -> new TemporalStabilitySensorBlock()));
+    public static ItemRegistryWrapper<Item> TEMPORAL_STABILITY_SENSOR_ITEM = new ItemRegistryWrapper<>(ITEMS.register(ModNames.TEMPORAL_STABILITY_SENSOR, () -> getDefaultBlockItem(TEMPORAL_STABILITY_SENSOR.get())));
 
     public static ItemRegistryWrapper<Item> REMOTE = new ItemRegistryWrapper<>(ITEMS.register(ModNames.REMOTE, RemoteItem::new));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<RemoteItem.RemoteData>> REMOTE_DATA = DATA.register("remote_data",

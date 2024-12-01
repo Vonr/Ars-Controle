@@ -14,6 +14,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
@@ -150,6 +151,28 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         var level = this.getTargetLevel();
         if (level != null) {
             tag.putString("dimension", level.dimension().location().toString());
+        }
+    }
+
+    @Override
+    public void onFinishedConnectionLast(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
+        if (!(player instanceof ServerPlayer sp)) {
+            return;
+        }
+        if (storedPos != null) {
+            var server = sp.getServer();
+            var level = Cached.getLevelByName(server.getAllLevels(), storedPos.dimension().location().toString());
+
+            if (level == null) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
+                return;
+            }
+
+            if (this.setBlock(level, storedPos.pos())) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.pos().toShortString(), level.dimension().location().toString()));
+            } else {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
+            }
         }
     }
 

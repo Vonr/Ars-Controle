@@ -100,6 +100,13 @@ public class ArsProviders {
                     .build());
 
             addRecipe(builder()
+                    .withResult(ModRegistry.TEMPORAL_STABILITY_SENSOR_ITEM)
+                    .withReagent(Items.CLOCK)
+                    .withPedestalItem(1, Ingredient.of(Items.ENDER_EYE))
+                    .withPedestalItem(1, Ingredient.of(BlockRegistry.SOURCE_GEM_BLOCK))
+                    .build());
+
+            addRecipe(builder()
                     .withResult(ModRegistry.REMOTE)
                     .withReagent(ItemsRegistry.DOMINION_ROD)
                     .withPedestalItem(4, Ingredient.of(Tags.Items.ENDER_PEARLS))
@@ -183,6 +190,14 @@ public class ArsProviders {
                             .withTextPage("ars_controle.page1.scryers_linkage")
                             .withPage(new ApparatusPage(ModRegistry.SCRYERS_LINKAGE_ITEM)),
                     getPath(AUTOMATION, ModNames.SCRYERS_LINKAGE));
+
+
+            addPage(new PatchouliBuilder(AUTOMATION, ModRegistry.TEMPORAL_STABILITY_SENSOR_ITEM.get())
+                            .withName("ars_controle.page.temporal_stability_sensor")
+                            .withIcon(ModRegistry.TEMPORAL_STABILITY_SENSOR_ITEM.get())
+                            .withTextPage("ars_controle.page1.temporal_stability_sensor")
+                            .withPage(new ApparatusPage(ModRegistry.TEMPORAL_STABILITY_SENSOR_ITEM)),
+                    getPath(AUTOMATION, ModNames.TEMPORAL_STABILITY_SENSOR));
 
             addPage(new PatchouliBuilder(AUTOMATION, ModRegistry.REMOTE.get())
                             .withName("ars_controle.page.remote")

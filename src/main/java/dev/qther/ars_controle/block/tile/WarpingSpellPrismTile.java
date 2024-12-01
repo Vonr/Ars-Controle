@@ -8,6 +8,7 @@ import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -176,6 +177,22 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     @Override
+    public void onFinishedConnectionLast(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
+        if (storedPos != null) {
+            this.setBlock(storedPos.dimension(), storedPos.pos());
+            this.setChanged();
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.pos().toShortString(), storedPos.dimension().location().toString()));
+            return;
+        }
+
+        if (storedEntity != null) {
+            this.setEntityUUID(storedEntity.getUUID());
+            this.setChanged();
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));
+        }
+    }
+
+    @Override
     public void onFinishedConnectionLast(@Nullable BlockPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
         if (storedPos != null) {
             var dim = player.level().dimension();
@@ -186,7 +203,6 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
         }
 
         if (storedEntity != null) {
-            this.setEntityUUID(storedEntity.getUUID());
             this.setEntityUUID(storedEntity.getUUID());
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));

@@ -6,7 +6,6 @@
   "plugin": "dev.qther.ars_controle.mixin.ArsControleMixinPlugin",
   "mixins": [
     "ComparatorBlockMixin",
-    "EventQueueMixin",
     "StandardSpellValidatorMixin",
     "cross_dim_fixes.EffectBlinkMixin"
   ],

@@ -233,16 +233,6 @@ public class ScryersLinkageBlock extends TickableModBlock implements EntityBlock
                 if (target.getAndSet(newBe) != newBe) {
                     tile.invalidateCapabilities();
                 }
-//                BlockPos.MutableBlockPos updatePos = new BlockPos.MutableBlockPos();
-//                for (Direction direction : BlockBehaviour.UPDATE_SHAPE_ORDER) {
-//                    updatePos.setWithOffset(pos, direction);
-//
-//                    if (level.getBlockState(updatePos).is(Blocks.OBSERVER)) {
-//                        continue;
-//                    }
-//
-//                    level.neighborShapeChanged(direction.getOpposite(), state, updatePos, pos, 3, 512);
-//                }
                 level.updateNeighborsAt(pos, state.getBlock());
                 level.updateNeighbourForOutputSignal(pos, state.getBlock());
             }
