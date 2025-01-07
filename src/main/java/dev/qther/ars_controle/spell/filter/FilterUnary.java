@@ -27,6 +27,11 @@ public class FilterUnary extends AbstractFilter implements IAdaptiveFilter {
     }
 
     @Override
+    public Integer getTypeIndex() {
+        return 15;
+    }
+
+    @Override
     public void onResolveEntity(EntityHitResult rayTraceResult, Level world, @NotNull LivingEntity shooter, SpellStats spellStats, SpellContext spellContext, SpellResolver resolver) {
         this.res = resolver;
         super.onResolveEntity(rayTraceResult, world, shooter, spellStats, spellContext, resolver);

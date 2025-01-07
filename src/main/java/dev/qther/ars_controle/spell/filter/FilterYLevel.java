@@ -27,6 +27,11 @@ public class FilterYLevel extends AbstractFilter {
     }
 
     @Override
+    public Integer getTypeIndex() {
+        return 15;
+    }
+
+    @Override
     public boolean shouldResolveOnBlock(BlockHitResult target, Level level) {
         return Integer.compare(target.getBlockPos().getY(), this.y) == comparison;
     }

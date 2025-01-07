@@ -25,6 +25,11 @@ public class FilterRandom extends AbstractFilter {
     }
 
     @Override
+    public Integer getTypeIndex() {
+        return 15;
+    }
+
+    @Override
     public boolean shouldResolveOnBlock(BlockHitResult target, Level level) {
         return this.shouldResolve();
     }
