@@ -9,10 +9,6 @@
     "StandardSpellValidatorMixin",
     "cross_dim_fixes.EffectBlinkMixin"
   ],
-  "client": [
-    "enhanced_spellbook_controls.GuiSpellBookMixin",
-    "enhanced_spellbook_controls.ScreenMixin"
-  ],
   "injectors": {
     "defaultRequire": 1
   }
