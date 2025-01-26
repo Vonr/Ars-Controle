@@ -4,14 +4,16 @@ Addon for Ars Nouveau focused on increasing control.
 
 ## Content
 
-### Warping Spell Prism ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/warping_spell_prism.png?raw=true)
+### Blocks
+
+#### Warping Spell Prism ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/warping_spell_prism.png?raw=true)
 
 The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions!
 
 It is also configurable through CC: Tweaked (though only for block positions, not entities), allowing for advanced
 setups.
 
-### Scryer's Linkage
+#### Scryer's Linkage
 
 The Scryer's Linkage links to another block, allowing machines to interact with its linked block from distance places.
 
@@ -19,15 +21,7 @@ It is capable of linking items, liquids, energy, redstone, and a few other thing
 
 To configure it, use a Dominion Wand first on the block you want to link to, then the linkage.
 
-### Portable Brazier Relay
-
-The Portable Brazier Relay allows you to carry the effects of a ritual on you.
-This requires the ritual brazier to stay loaded and have a supply of source.
-
-Now you can carry a Flight ritual to have flight anywhere you go, a Sanctuary ritual to have an easier time 
-exploring at night, a Conjure Island ritual for no reason at all, or a variety of other useful or silly combinations.
-
-### Temporal Stability Sensor ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/temporal_stability_sensor.png?raw=true)
+#### Temporal Stability Sensor ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/temporal_stability_sensor.png?raw=true)
 
 The Temporal Stability Sensor shows how unstable the time of the world is. 
 
@@ -36,7 +30,9 @@ with higher redstone output meaning the world is closer to lagging.
 
 You can use this to turn off farms automatically to prevent the server from lagging.
 
-### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
+### Items
+
+#### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
 
 The Remote is an item that lets you remotely configure blocks such as the Warping Spell Prism and Storage Lectern.
 
@@ -46,6 +42,14 @@ To clear its configuration target, left click on air while holding the remote.
 
 The remote will allow for cross dimensional configuration of the Warping Spell Prism, unlike the Dominion Wand
 which does not store dimensions. (Dominion wands can now configure cross-dimensionally in Ars Nouveau 5.3.2 and higher)
+
+#### Portable Brazier Relay
+
+The Portable Brazier Relay allows you to carry the effects of a ritual on you.
+This requires the ritual brazier to stay loaded and have a supply of source.
+
+Now you can carry a Flight ritual to have flight anywhere you go, a Sanctuary ritual to have an easier time
+exploring at night, a Conjure Island ritual for no reason at all, or a variety of other useful or silly combinations.
 
 ### Adaptive Filters
 
@@ -85,12 +89,3 @@ Filter: Random ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resou
 
 Precise Delay ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/glyph_precise_delay.png?raw=true)  
 - Delays the remainder of the spell by `(2 ^ Extend Time Augments)` ticks
-
-### Spell Book Control Improvements
-
-#### Search Bar
-- Auto-Focus
-  - Clear Search Bar on Auto-Focus
-
-#### Spell Crafting
-- Swap Glyphs with Number Keys
