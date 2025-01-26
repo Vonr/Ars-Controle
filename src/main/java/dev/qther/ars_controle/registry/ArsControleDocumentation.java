@@ -5,6 +5,8 @@ import com.hollingsworth.arsnouveau.api.documentation.ReloadDocumentationEvent;
 import com.hollingsworth.arsnouveau.api.documentation.builder.DocEntryBuilder;
 import com.hollingsworth.arsnouveau.api.documentation.entry.DocEntry;
 import com.hollingsworth.arsnouveau.api.registry.DocumentationRegistry;
+import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
+import com.hollingsworth.arsnouveau.api.spell.SpellSchool;
 import com.hollingsworth.arsnouveau.setup.registry.*;
 import dev.qther.ars_controle.ArsControle;
 import net.minecraft.network.chat.Component;
@@ -21,6 +23,22 @@ import static com.hollingsworth.arsnouveau.api.registry.DocumentationRegistry.*;
 public class ArsControleDocumentation {
     @SubscribeEvent
     public static void addPages(ReloadDocumentationEvent.AddEntries event) {
+        for (var glyph : ArsNouveauRegistry.registeredSpells) {
+            var entry = addPage(EntryBuilder.of(glyph)
+                    .withName("ars_controle.glyph_name." + glyph.getRegistryName().getPath())
+                    .withIcon(glyph.glyphItem)
+                    .withCraftingPages(glyph.glyphItem));
+
+            entry.withSearchTag(Component.translatable("ars_nouveau.keyword.glyph"));
+
+            for (SpellSchool school : glyph.spellSchools){
+                entry.withSearchTag(school.getTextComponent());
+                for (SpellSchool subschool : school.getSubSchools()) {
+                    entry.withSearchTag(subschool.getTextComponent());
+                }
+            }
+        }
+
         addPage(EntryBuilder.of(CRAFTING, ModRegistry.WARPING_SPELL_PRISM_BLOCK)
                         .withIcon(ModRegistry.WARPING_SPELL_PRISM_BLOCK)
                         .withTextPage("ars_controle.page1.warping_spell_prism")
@@ -94,6 +112,10 @@ public class ArsControleDocumentation {
 
         public static EntryBuilder of(DocCategory category, ItemRegistryWrapper<? extends Item> item) {
             return of(category, item.get().getDescriptionId());
+        }
+
+        public static EntryBuilder of(AbstractSpellPart glyph) {
+            return of(Documentation.glyphCategory(glyph.getConfigTier()), glyph.getRegistryName().getPath());
         }
 
         public static EntryBuilder of(DocCategory category, BlockRegistryWrapper<? extends Block> block) {
