@@ -131,13 +131,12 @@ configurations {
 dependencies {
     var patchless_mc_version = project.mc_version.count('.') != 2 ? project.mc_version : project.mc_version.replaceFirst("\\.\\d*\$", "")
     implementation "com.hollingsworth.ars_nouveau:ars_nouveau-${project.mc_version}:${project.ars_version}"
-    implementation "software.bernie.geckolib:geckolib-neoforge-${project.mc_version}:${project.gecko_version}"
-    implementation "vazkii.patchouli:Patchouli:${patchless_mc_version}-${project.patchouli_version}"
 
+    compileOnly "software.bernie.geckolib:geckolib-neoforge-${project.mc_version}:${project.gecko_version}"
+    compileOnly "com.hollingsworth.nuggets:nuggets-neoforge-${patchless_mc_version}:${project.nuggets_version}"
     compileOnly "mezz.jei:jei-${project.mc_version}-neoforge-api:${project.jei_version}"
-    implementation "mezz.jei:jei-${project.mc_version}-neoforge:${project.jei_version}"
-
-    implementation "top.theillusivec4.curios:curios-neoforge:${project.curios_version}+${patchless_mc_version}"
+    localRuntime "mezz.jei:jei-${project.mc_version}-neoforge:${project.jei_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${project.curios_version}+${patchless_mc_version}"
 
     compileOnly "cc.tweaked:cc-tweaked-$patchless_mc_version-core-api:$project.cc_tweaked_version"
     implementation "cc.tweaked:cc-tweaked-$patchless_mc_version-forge-api:$project.cc_tweaked_version"

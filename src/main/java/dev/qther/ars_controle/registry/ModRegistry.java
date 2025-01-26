@@ -7,6 +7,7 @@ import dev.qther.ars_controle.block.ScryersLinkageBlock;
 import dev.qther.ars_controle.block.TemporalStabilitySensorBlock;
 import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
 import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
+import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.item.RemoteItem;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import net.minecraft.core.component.DataComponentType;
@@ -55,6 +56,11 @@ public class ModRegistry {
     public static ItemRegistryWrapper<Item> REMOTE = new ItemRegistryWrapper<>(ITEMS.register(ModNames.REMOTE, RemoteItem::new));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<RemoteItem.RemoteData>> REMOTE_DATA = DATA.register("remote_data",
             () -> DataComponentType.<RemoteItem.RemoteData>builder().persistent(RemoteItem.RemoteData.CODEC).networkSynchronized(RemoteItem.RemoteData.STREAM_CODEC).build()
+    );
+
+    public static ItemRegistryWrapper<Item> PORTABLE_BRAZIER_RELAY = new ItemRegistryWrapper<>(ITEMS.register(ModNames.PORTABLE_BRAZIER_RELAY, PortableBrazierRelayItem::new));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PortableBrazierRelayItem.PortableBrazierRelayData>> PORTABLE_BRAZIER_RELAY_DATA = DATA.register("portable_brazier",
+            () -> DataComponentType.<PortableBrazierRelayItem.PortableBrazierRelayData>builder().persistent(PortableBrazierRelayItem.PortableBrazierRelayData.CODEC).networkSynchronized(PortableBrazierRelayItem.PortableBrazierRelayData.STREAM_CODEC).build()
     );
 
     public static DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB = TABS.register("general", () -> CreativeModeTab.builder()

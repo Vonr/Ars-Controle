@@ -8,8 +8,10 @@ import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -49,34 +51,38 @@ public class ScryersLinkageBlock extends TickableModBlock implements EntityBlock
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult _hr) {
+    protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
         if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
 
         if (ANEventBus.post(new BlockEvent.BreakEvent(level, pos, state, player))) {
-            return InteractionResult.FAIL;
+            return ItemInteractionResult.FAIL;
         }
 
         var te = level.getBlockEntity(pos);
         if (te == null) {
             ArsControle.LOGGER.warn("No tile entity in scryer's linkage.");
-            return InteractionResult.FAIL;
+            return ItemInteractionResult.FAIL;
         }
 
         if (!(te instanceof ScryersLinkageTile tile)) {
             ArsControle.LOGGER.warn("Wrong tile entity in scryer's linkage.");
-            return InteractionResult.FAIL;
+            return ItemInteractionResult.FAIL;
+        }
+
+        if (!stack.isEmpty()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
         var b = tile.getTarget();
         if (b == null) {
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
 
         PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.pos().toShortString(), b.dimension().location().toString()));
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override

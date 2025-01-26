@@ -7,7 +7,6 @@ import com.hollingsworth.arsnouveau.api.util.BlockUtil;
 import com.hollingsworth.arsnouveau.api.util.SourceUtil;
 import com.hollingsworth.arsnouveau.common.advancement.ANCriteriaTriggers;
 import com.hollingsworth.arsnouveau.common.block.ModBlock;
-import com.hollingsworth.arsnouveau.common.entity.EntityFollowProjectile;
 import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
@@ -40,7 +39,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult _hr) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult _hr) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -186,37 +185,10 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         int manaCost = tile.getSourceRequired(hit);
         if (manaCost > 0) {
-            var providers = SourceUtil.canTakeSource(pos, world, 19);
-            var needed = manaCost;
-            for (var provider : providers) {
-                var source = Math.min(needed, provider.getSource().getSource());
-                if (source > 0) {
-                    needed -= source;
-                }
-                if (needed <= 0) {
-                    break;
-                }
-            }
-
-            if (needed > 0) {
+            if (SourceUtil.takeSourceMultipleWithParticles(pos, world, 19, manaCost) == null) {
                 world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
                 spell.remove(RemovalReason.DISCARDED);
                 return;
-            }
-
-            needed = manaCost;
-            for (var provider : providers) {
-                var source = Math.min(needed, provider.getSource().getSource());
-                if (source > 0) {
-                    provider.getSource().removeSource(source);
-                    needed -= source;
-
-                    EntityFollowProjectile aoeProjectile = new EntityFollowProjectile(world, provider.getCurrentPos(), pos);
-                    world.addFreshEntity(aoeProjectile);
-                }
-                if (needed <= 0) {
-                    break;
-                }
             }
         }
 

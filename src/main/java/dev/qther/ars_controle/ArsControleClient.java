@@ -2,7 +2,7 @@ package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.config.ClientConfig;
 import dev.qther.ars_controle.config.ConfigScreenFactory;
-import dev.qther.ars_controle.packets.PacketClearRemote;
+import dev.qther.ars_controle.packets.serverbound.PacketClearRemote;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;

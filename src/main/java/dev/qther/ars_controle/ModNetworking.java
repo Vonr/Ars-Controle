@@ -2,7 +2,8 @@ package dev.qther.ars_controle;
 
 import com.hollingsworth.arsnouveau.common.network.AbstractPacket;
 import com.hollingsworth.arsnouveau.common.network.Networking;
-import dev.qther.ars_controle.packets.PacketClearRemote;
+import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
+import dev.qther.ars_controle.packets.serverbound.PacketClearRemote;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -25,6 +26,8 @@ public class ModNetworking {
         final PayloadRegistrar reg = event.registrar("1");
 
         reg.playToServer(PacketClearRemote.TYPE, PacketClearRemote.CODEC, ModNetworking::handle);
+
+        reg.playToClient(PacketSyncAssociation.TYPE, PacketSyncAssociation.CODEC, ModNetworking::handle);
     }
 
     private static <T extends AbstractPacket> void handle(T message, IPayloadContext ctx) {

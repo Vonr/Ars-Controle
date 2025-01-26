@@ -3,7 +3,9 @@ package dev.qther.ars_controle;
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
 import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
+import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.registry.ArsNouveauRegistry;
+import dev.qther.ars_controle.registry.AttachmentRegistry;
 import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -14,6 +16,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +29,14 @@ public class ArsControle {
 
     public ArsControle(IEventBus bus, ModContainer container) {
         ModRegistry.registerRegistries(bus);
+        AttachmentRegistry.register(bus);
         ArsNouveauRegistry.registerGlyphs();
         bus.addListener(this::setup);
         bus.addListener(Setup::gatherData);
         bus.addListener(ModNetworking::register);
         bus.addListener(this::onRegisterCapabilities);
+
+        NeoForge.EVENT_BUS.addListener(ArsControle::onServerStopped);
 
         container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
     }
@@ -66,5 +73,11 @@ public class ArsControle {
                 LOGGER.error("Could not register capability for linkage", e);
             }
         }
+    }
+
+    public static void onServerStopped(ServerStoppedEvent event) {
+        Cached.LEVELS_BY_NAME.clear();
+        Cached.ENTITIES_BY_UUID.invalidateAll();
+        PortableBrazierRelayItem.clearCache();
     }
 }

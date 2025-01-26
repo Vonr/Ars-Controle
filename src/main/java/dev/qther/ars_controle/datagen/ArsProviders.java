@@ -12,6 +12,7 @@ import com.hollingsworth.arsnouveau.common.datagen.ApparatusRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.GlyphRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.ImbuementRecipeProvider;
 import com.hollingsworth.arsnouveau.common.datagen.patchouli.*;
+import com.hollingsworth.arsnouveau.common.lib.LibBlockNames;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentRandomize;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.registry.ItemsRegistry;
@@ -25,6 +26,7 @@ import dev.qther.ars_controle.spell.filter.FilterBinary;
 import dev.qther.ars_controle.spell.filter.FilterRandom;
 import dev.qther.ars_controle.spell.filter.FilterUnary;
 import dev.qther.ars_controle.spell.filter.FilterYLevel;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +37,7 @@ import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.Tags;
 
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 import static com.hollingsworth.arsnouveau.setup.registry.RegistryHelper.getRegistryName;
 
@@ -113,6 +116,16 @@ public class ArsProviders {
                     .withPedestalItem(4, Ingredient.of(Items.POPPED_CHORUS_FRUIT))
                     .build());
 
+            addRecipe(builder()
+                    .withResult(ModRegistry.PORTABLE_BRAZIER_RELAY)
+                    .withReagent(BlockRegistry.BRAZIER_RELAY)
+                    .withPedestalItem(2, Ingredient.of(Tags.Items.ENDER_PEARLS))
+                    .withPedestalItem(2, Ingredient.of(Items.POPPED_CHORUS_FRUIT))
+                    .withPedestalItem(2, Ingredient.of(ItemsRegistry.MANIPULATION_ESSENCE))
+                    .withPedestalItem(1, Ingredient.of(Items.NETHER_STAR))
+                    .withPedestalItem(1, Ingredient.of(ItemsRegistry.WILDEN_TRIBUTE))
+                    .build());
+
             var output = this.generator.getPackOutput().getOutputFolder();
             for (var g : recipes) {
                 if (g != null) {
@@ -166,8 +179,8 @@ public class ArsProviders {
     }
 
     public static class PatchouliProvider extends com.hollingsworth.arsnouveau.common.datagen.PatchouliProvider {
-        public PatchouliProvider(DataGenerator generatorIn) {
-            super(generatorIn);
+        public PatchouliProvider(DataGenerator generatorIn, CompletableFuture<HolderLookup.Provider> registries) {
+            super(generatorIn, registries);
         }
 
         @Override
@@ -207,6 +220,16 @@ public class ArsProviders {
                             .withPage(new ApparatusPage(ModRegistry.REMOTE))
                             .withPage(new RelationsPage().withEntry(AUTOMATION, "dominion_wand")),
                     getPath(AUTOMATION, ModNames.REMOTE));
+
+            addPage(new PatchouliBuilder(EQUIPMENT, ModRegistry.PORTABLE_BRAZIER_RELAY.get())
+                            .withName("ars_controle.page.portable_brazier_relay")
+                            .withIcon(ModRegistry.PORTABLE_BRAZIER_RELAY.get())
+                            .withTextPage("ars_controle.page1.portable_brazier_relay")
+                            .withPage(new ApparatusPage(ModRegistry.PORTABLE_BRAZIER_RELAY))
+                            .withPage(new RelationsPage()
+                                            .withEntry(MACHINES, LibBlockNames.RITUAL_BRAZIER)
+                                            .withEntry(MACHINES, LibBlockNames.BRAZIER_RELAY)),
+                    getPath(EQUIPMENT, ModNames.PORTABLE_BRAZIER_RELAY));
 
             System.out.println(this.pages);
 

@@ -7,6 +7,7 @@ public class ModNames {
     public static final String SCRYERS_LINKAGE = "scryers_linkage";
     public static final String TEMPORAL_STABILITY_SENSOR = "temporal_stability_sensor";
     public static final String REMOTE = "remote";
+    public static final String PORTABLE_BRAZIER_RELAY = "portable_brazier_relay";
 
     public static final String GLYPH_PRECISE_DELAY = GlyphLib.prependGlyph("precise_delay");
     public static final String GLYPH_FILTER_ABOVE = GlyphLib.prependGlyph("filter_above");

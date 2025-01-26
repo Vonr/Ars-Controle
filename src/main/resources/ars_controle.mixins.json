@@ -5,9 +5,12 @@
   "package": "dev.qther.ars_controle.mixin",
   "plugin": "dev.qther.ars_controle.mixin.ArsControleMixinPlugin",
   "mixins": [
+    "AbstractRitualInvoker",
+    "AbstractRitualMixin",
     "ComparatorBlockMixin",
-    "StandardSpellValidatorMixin",
-    "cross_dim_fixes.EffectBlinkMixin"
+    "RitualBrazierTileMixin",
+    "RitualEventQueueMixin",
+    "StandardSpellValidatorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

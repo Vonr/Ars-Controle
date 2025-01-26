@@ -1,4 +1,4 @@
-package dev.qther.ars_controle.packets;
+package dev.qther.ars_controle.packets.serverbound;
 
 import com.hollingsworth.arsnouveau.common.network.AbstractPacket;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;

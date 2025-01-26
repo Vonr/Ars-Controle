@@ -25,7 +25,7 @@ description = '''${mod_description}'''
 [[mixins]]
 config="${mod_id}.mixins.json"
 
-[[dependencies.${mod_id}]]
+[[dependencies."${mod_id}"]]
 modId="neoforge"
 type="required"
 versionRange="${neo_version_range}"
@@ -33,34 +33,39 @@ ordering="NONE"
 side="BOTH"
 
 # Here's another dependency
-[[dependencies.${mod_id}]]
+[[dependencies."${mod_id}"]]
 modId="minecraft"
 type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies."${mod_id}"]]
 modId="patchouli"
 mandatory=false
 versionRange="[1.21-87,)"
 ordering="AFTER"
 side="BOTH"
+    [dependencies."${mod_id}".mc-publish]
+    modrinth = "patchouli"
+    curseforge = "patchouli"
 
-[[dependencies.${mod_id}]]
+[[dependencies."${mod_id}"]]
 modId="curios"
 mandatory=true
 versionRange="[1.21-9.0.0,)"
 ordering="AFTER"
 side="BOTH"
+    [dependencies."${mod_id}".mc-publish]
+    modrinth = "curios"
+    curseforge = "curios"
 
-[[dependencies.${mod_id}]]
+[[dependencies."${mod_id}"]]
 modId="ars_nouveau"
 mandatory=true
-versionRange="[5.3.2,)"
+versionRange="[5.4.0,)"
 ordering="AFTER"
 side="BOTH"
-
-[dependencies.ars_additions.custom.mc-publish]
-ignore=false
-curseforge="ars-nouveau" # CurseForge's project slug
+    [dependencies."${mod_id}".mc-publish]
+    modrinth = "ars-nouveau"
+    curseforge = "ars-nouveau"
