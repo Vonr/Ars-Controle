@@ -8,6 +8,9 @@ Addon for Ars Nouveau focused on increasing control.
 
 The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions!
 
+It is also configurable through CC: Tweaked (though only for block positions, not entities), allowing for advanced
+setups.
+
 ### Scryer's Linkage
 
 The Scryer's Linkage links to another block, allowing machines to interact with its linked block from distance places.
@@ -16,7 +19,15 @@ It is capable of linking items, liquids, energy, redstone, and a few other thing
 
 To configure it, use a Dominion Wand first on the block you want to link to, then the linkage.
 
-# Temporal Stability Sensor ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/temporal_stability_sensor.png?raw=true)
+### Portable Brazier Relay
+
+The Portable Brazier Relay allows you to carry the effects of a ritual on you.
+This requires the ritual brazier to stay loaded and have a supply of source.
+
+Now you can carry a Flight ritual to have flight anywhere you go, a Sanctuary ritual to have an easier time 
+exploring at night, a Conjure Island ritual for no reason at all, or a variety of other useful or silly combinations.
+
+### Temporal Stability Sensor ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/block/temporal_stability_sensor.png?raw=true)
 
 The Temporal Stability Sensor shows how unstable the time of the world is. 
 
