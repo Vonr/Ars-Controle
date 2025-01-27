@@ -1,7 +1,9 @@
 package dev.qther.ars_controle.block.tile;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
+import com.hollingsworth.arsnouveau.common.block.CraftingLecternBlock;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
+import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.Cached;
 import dev.qther.ars_controle.block.ScryersLinkageBlock;
@@ -42,26 +44,28 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         return new GlobalPos(info.first().dimension(), info.second());
     }
 
-    public @Nullable Pair<ServerLevel, BlockPos> getTargetInfo() {
-        if (level == null || level.isClientSide) {
+    public @Nullable Pair<Level, BlockPos> getTargetInfo() {
+        if (level == null) {
             return null;
         }
 
         var targetLevel = this.getTargetLevel();
         var targetPos = this.getTargetBlock();
-        if (targetLevel == null || targetLevel.isClientSide || targetPos == null) {
+        if (targetLevel == null || targetPos == null) {
             return null;
         }
 
-        if (targetLevel.getBlockState(targetPos).getBlock() instanceof ScryersLinkageBlock) {
+        var block = targetLevel.getBlockState(targetPos).getBlock();
+        if (block instanceof ScryersLinkageBlock || block instanceof CraftingLecternBlock) {
             this.removeBlock();
+            return null;
         }
 
         return Pair.of(targetLevel, targetPos);
     }
 
     public boolean hasTarget() {
-        if (level == null || level.isClientSide) {
+        if (level == null) {
             return false;
         }
 
@@ -71,12 +75,12 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
 
     public boolean setBlock(@NotNull Level level, @NotNull BlockPos block) {
         var thisLevel = this.getLevel();
-        if (thisLevel == null || thisLevel.isClientSide || level.isClientSide) {
+        if (thisLevel == null) {
             return false;
         }
 
         var target = level.getBlockState(block);
-        if (target.getBlock() instanceof ScryersLinkageBlock) {
+        if (target.getBlock() instanceof ScryersLinkageBlock || target.getBlock() instanceof CraftingLecternBlock) {
             return false;
         }
 
@@ -90,7 +94,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
 
     public void removeBlock() {
         var level = this.getLevel();
-        if (level == null || level.isClientSide) {
+        if (level == null) {
             return;
         }
 
@@ -102,7 +106,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
 
     private void notifyChange() {
         var level = this.getLevel();
-        if (level == null || level.isClientSide) {
+        if (level == null) {
             return;
         }
 
@@ -116,14 +120,22 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         state.updateNeighbourShapes(level, pos, 3);
     }
 
-    private @Nullable ServerLevel getTargetLevel() {
-        if (level == null || level.isClientSide) {
+    private @Nullable Level getTargetLevel() {
+        if (level == null) {
             return null;
         }
 
         var tag = this.getPersistentData();
         var s = tag.contains("dimension", 8) ? tag.getString("dimension") : null;
-        if (s == null || level == null) {
+        if (s == null) {
+            return null;
+        }
+
+        if (s.equals(level.dimension().location().toString())) {
+            return level;
+        }
+
+        if (level.isClientSide) {
             return null;
         }
 
@@ -131,7 +143,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
     }
 
     private @Nullable BlockPos getTargetBlock() {
-        if (level == null || level.isClientSide) {
+        if (level == null) {
             return null;
         }
 
@@ -201,9 +213,11 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         var pos = info.second();
 
         var loadPos = new ChunkPos(pos);
-        level.getChunkSource().addRegionTicket(TICKET_TYPE, loadPos, 1, loadPos, true);
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.getChunkSource().addRegionTicket(TICKET_TYPE, loadPos, 1, loadPos, true);
+        }
         var be = level.getBlockEntity(pos);
-        if (be == null || (be instanceof ScryersLinkageTile)) {
+        if (be == null || be instanceof ScryersLinkageTile || be instanceof StorageLecternTile) {
             return null;
         }
 
