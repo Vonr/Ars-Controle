@@ -12,6 +12,9 @@
     "RitualEventQueueMixin",
     "StandardSpellValidatorMixin"
   ],
+  "client": [
+    "LevelRendererInvoker"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

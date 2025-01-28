@@ -5,9 +5,11 @@ import com.hollingsworth.arsnouveau.common.block.TickableModBlock;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
+import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +29,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,7 +84,13 @@ public class ScryersLinkageBlock extends TickableModBlock implements EntityBlock
             return ItemInteractionResult.SUCCESS;
         }
 
-        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.pos().toShortString(), b.dimension().location().toString()));
+        if (player instanceof ServerPlayer serverPlayer) {
+            PortUtil.sendMessage(serverPlayer, Component.translatable("ars_controle.target.get.block", b.pos().toShortString(), b.dimension().location().toString()));
+            if (serverPlayer.level().dimension().equals(b.dimension())) {
+                PacketDistributor.sendToPlayer(serverPlayer, new PacketRenderBlockOutline(b.pos(), 10 * 20));
+            }
+        }
+
         return ItemInteractionResult.SUCCESS;
     }
 

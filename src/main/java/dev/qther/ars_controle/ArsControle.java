@@ -4,6 +4,7 @@ import dev.qther.ars_controle.cc.ArsControleCCCompat;
 import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
+import dev.qther.ars_controle.packets.ModNetworking;
 import dev.qther.ars_controle.registry.ArsNouveauRegistry;
 import dev.qther.ars_controle.registry.AttachmentRegistry;
 import dev.qther.ars_controle.registry.ModRegistry;
