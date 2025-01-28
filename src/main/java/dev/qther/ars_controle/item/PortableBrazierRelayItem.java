@@ -11,6 +11,9 @@ import dev.qther.ars_controle.mixin.AbstractRitualInvoker;
 import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
 import dev.qther.ars_controle.registry.AttachmentRegistry;
 import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.util.RenderQueue;
+import dev.qther.ars_controle.util.RenderUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,6 +31,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
@@ -148,6 +152,24 @@ public class PortableBrazierRelayItem extends ModItem {
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
+
+        if (level.isClientSide) {
+            var player = Minecraft.getInstance().player;
+            if (player == null
+                || (!ItemStack.isSameItemSameComponents(stack, player.getMainHandItem())
+                && !ItemStack.isSameItemSameComponents(stack, player.getOffhandItem()))) {
+                return;
+            }
+
+            var data = stack.get(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+            if (data != null && data.pos.isPresent() && data.pos.get().dimension().equals(level.dimension())) {
+                RenderQueue.enqueue(RenderQueue.RenderTask.until((event) -> {
+                    if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+                        RenderUtil.renderBlockOutline(event, data.pos.get().pos());
+                    }
+                }, level.getGameTime()));
+            }
+        }
 
         if (!(level instanceof ServerLevel serverLevel)) {
             return;

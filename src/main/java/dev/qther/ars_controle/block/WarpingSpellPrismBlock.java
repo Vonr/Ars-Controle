@@ -12,10 +12,12 @@ import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import dev.qther.ars_controle.config.ServerConfig;
+import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity.RemovalReason;
@@ -29,6 +31,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -79,7 +82,12 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             }
             case BlockHitResult b -> {
                 var dim = tile.getTargetLevel();
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
+                if (player instanceof ServerPlayer serverPlayer) {
+                    PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.block", b.getBlockPos().toShortString(), dim == null ? "<invalid>" : dim.dimension().location().toString()));
+                    if (serverPlayer.level().equals(dim)) {
+                        PacketDistributor.sendToPlayer(serverPlayer, new PacketRenderBlockOutline(b.getBlockPos(), 10 * 20));
+                    }
+                }
                 return InteractionResult.SUCCESS;
             }
             default -> {
