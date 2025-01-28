@@ -41,16 +41,6 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies."${mod_id}"]]
-modId="patchouli"
-mandatory=false
-versionRange="[1.21-87,)"
-ordering="AFTER"
-side="BOTH"
-    [dependencies."${mod_id}".mc-publish]
-    modrinth = "patchouli"
-    curseforge = "patchouli"
-
-[[dependencies."${mod_id}"]]
 modId="curios"
 mandatory=true
 versionRange="[1.21-9.0.0,)"
