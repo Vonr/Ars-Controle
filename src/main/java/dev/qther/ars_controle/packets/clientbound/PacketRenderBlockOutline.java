@@ -11,6 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 public final class PacketRenderBlockOutline extends AbstractPacket {
     public static final Type<PacketRenderBlockOutline> TYPE = new Type<>(ArsControle.prefix("enqueue_render_task"));
@@ -36,7 +37,11 @@ public final class PacketRenderBlockOutline extends AbstractPacket {
 
     @Override
     public void onClientReceived(Minecraft minecraft, Player player) {
-        var task = RenderQueue.RenderTask.ofDuration((stack) -> RenderUtil.renderBlockOutline(stack, this.pos), this.duration);
+        var task = RenderQueue.RenderTask.ofDuration((event) -> {
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+                RenderUtil.renderBlockOutline(event, this.pos);
+            }
+        }, this.duration);
         if (task != null) {
             RenderQueue.enqueue(task);
         }

@@ -1,6 +1,5 @@
 package dev.qther.ars_controle.util;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -62,27 +61,28 @@ public class RenderQueue {
         ClientLevel level = Minecraft.getInstance().level;
         LocalPlayer player = Minecraft.getInstance().player;
 
-        if (level == null || player == null || event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+        if (level == null || player == null) {
             return;
         }
 
         for (var task : QUEUE) {
-            task.fn.accept(event.getPoseStack());
+            task.fn.accept(event);
         }
     }
 
-    public record RenderTask(Consumer<PoseStack> fn, long until) {
-        public static RenderTask until(Consumer<PoseStack> fn, long until) {
+    public record RenderTask(Consumer<RenderLevelStageEvent> fn, long until) {
+        public static RenderTask until(Consumer<RenderLevelStageEvent> fn, long until) {
             return new RenderTask(fn, until);
         }
 
-        public static @Nullable RenderTask ofDuration(Consumer<PoseStack> fn, long length) {
+        public static @Nullable RenderTask ofDuration(Consumer<RenderLevelStageEvent> fn, long length) {
             var mc = Minecraft.getInstance();
             var level = mc.level;
             if (level == null) {
                 return null;
             }
-            return new RenderTask(fn, level.getGameTime() + length);
+
+            return RenderTask.until(fn, level.getGameTime() + length);
         }
     }
 }

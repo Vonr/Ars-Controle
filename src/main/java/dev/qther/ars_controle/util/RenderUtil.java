@@ -2,7 +2,6 @@ package dev.qther.ars_controle.util;
 
 import com.hollingsworth.arsnouveau.client.particle.ParticleColor;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -10,9 +9,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 public class RenderUtil {
-    public static void renderBlockOutline(PoseStack poseStack, BlockPos pos) {
+    public static void renderBlockOutline(RenderLevelStageEvent event, BlockPos pos) {
         var mc = Minecraft.getInstance();
         var level = mc.level;
         if (level == null) {
@@ -29,6 +29,7 @@ public class RenderUtil {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
 
+        var poseStack = event.getPoseStack();
         poseStack.pushPose();
         poseStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
         poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
