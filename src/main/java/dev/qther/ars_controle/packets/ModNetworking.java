@@ -1,7 +1,8 @@
-package dev.qther.ars_controle;
+package dev.qther.ars_controle.packets;
 
 import com.hollingsworth.arsnouveau.common.network.AbstractPacket;
 import com.hollingsworth.arsnouveau.common.network.Networking;
+import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
 import dev.qther.ars_controle.packets.serverbound.PacketClearRemote;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ public class ModNetworking {
         reg.playToServer(PacketClearRemote.TYPE, PacketClearRemote.CODEC, ModNetworking::handle);
 
         reg.playToClient(PacketSyncAssociation.TYPE, PacketSyncAssociation.CODEC, ModNetworking::handle);
+        reg.playToClient(PacketRenderBlockOutline.TYPE, PacketRenderBlockOutline.CODEC, ModNetworking::handle);
     }
 
     private static <T extends AbstractPacket> void handle(T message, IPayloadContext ctx) {
