@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.OptionalDouble;
@@ -40,8 +42,12 @@ public class RenderUtil {
             return;
         }
 
-        var state = level.getBlockState(pos);
-        var shape = state.getShape(level, pos);
+        VoxelShape shape;
+        if (level.isLoaded(pos)) {
+            shape = level.getBlockState(pos).getShape(level, pos);
+        } else {
+            shape = Shapes.box(0, 0, 0, 1, 1, 1);
+        }
 
         Vec3 projectedView = mc.gameRenderer.getMainCamera().getPosition();
 

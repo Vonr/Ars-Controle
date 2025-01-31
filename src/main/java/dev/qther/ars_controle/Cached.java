@@ -2,16 +2,21 @@ package dev.qther.ars_controle;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceArrayMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class Cached {
     public static final Map<String, WeakReference<ServerLevel>> LEVELS_BY_NAME = new Object2ReferenceArrayMap<>(8);
@@ -54,5 +59,11 @@ public class Cached {
         }
 
         return null;
+    }
+
+    private static final Map<UUID, CompletableFuture<Optional<GameProfile>>> PLAYER_NAME_BY_UUID = new Object2ObjectOpenHashMap<>();
+
+    public static CompletableFuture<Optional<GameProfile>> getGameProfileFromUUID(@NotNull UUID uuid) {
+        return PLAYER_NAME_BY_UUID.computeIfAbsent(uuid, SkullBlockEntity::fetchGameProfile);
     }
 }
