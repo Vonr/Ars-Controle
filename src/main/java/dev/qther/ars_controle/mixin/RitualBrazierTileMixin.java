@@ -4,8 +4,8 @@ import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualBrazierTile;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.registry.AttachmentRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -39,7 +39,7 @@ public abstract class RitualBrazierTileMixin extends BlockEntity {
             return;
         }
 
-        if (this.hasData(AttachmentRegistry.RELAY_UUID)) {
+        if (this.hasData(ACRegistry.Attachments.RELAY_UUID)) {
             return;
         }
 
@@ -57,7 +57,7 @@ public abstract class RitualBrazierTileMixin extends BlockEntity {
             return;
         }
 
-        var data = tile.getExistingData(AttachmentRegistry.ASSOCIATION);
+        var data = tile.getExistingData(ACRegistry.Attachments.ASSOCIATION);
         if (data.isPresent()) {
             try {
                 var uuid = data.get();

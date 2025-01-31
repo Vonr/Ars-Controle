@@ -5,9 +5,9 @@ import com.hollingsworth.arsnouveau.common.block.CraftingLecternBlock;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.block.ScryersLinkageBlock;
-import dev.qther.ars_controle.registry.ModRegistry;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,7 +32,7 @@ import java.util.Comparator;
 
 public class ScryersLinkageTile extends ModdedTile implements IWandable, Container {
     public ScryersLinkageTile(BlockPos pos, BlockState state) {
-        super(ModRegistry.SCRYERS_LINKAGE_TILE.get(), pos, state);
+        super(ACRegistry.Tiles.SCRYERS_LINKAGE.get(), pos, state);
     }
 
     public @Nullable GlobalPos getTarget() {

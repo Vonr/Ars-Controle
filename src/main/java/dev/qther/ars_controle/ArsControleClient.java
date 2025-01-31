@@ -2,9 +2,9 @@ package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.config.ClientConfig;
 import dev.qther.ars_controle.config.ConfigScreenFactory;
-import dev.qther.ars_controle.packets.ModNetworking;
+import dev.qther.ars_controle.packets.ACNetworking;
 import dev.qther.ars_controle.packets.serverbound.PacketClearRemote;
-import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.registry.ACRegistry;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -27,8 +27,8 @@ public class ArsControleClient {
     @SubscribeEvent
     public void onClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         var stack = event.getItemStack();
-        if (stack.getItem() == ModRegistry.REMOTE.get()) {
-            ModNetworking.sendToServer(new PacketClearRemote());
+        if (stack.getItem() == ACRegistry.Items.REMOTE.get()) {
+            ACNetworking.sendToServer(new PacketClearRemote());
         }
     }
 }

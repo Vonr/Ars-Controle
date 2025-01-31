@@ -20,16 +20,16 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public class ModNetworking {
+public class ACNetworking {
     public static PayloadRegistrar INSTANCE;
 
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar reg = event.registrar("1");
 
-        reg.playToServer(PacketClearRemote.TYPE, PacketClearRemote.CODEC, ModNetworking::handle);
+        reg.playToServer(PacketClearRemote.TYPE, PacketClearRemote.CODEC, ACNetworking::handle);
 
-        reg.playToClient(PacketSyncAssociation.TYPE, PacketSyncAssociation.CODEC, ModNetworking::handle);
-        reg.playToClient(PacketRenderBlockOutline.TYPE, PacketRenderBlockOutline.CODEC, ModNetworking::handle);
+        reg.playToClient(PacketSyncAssociation.TYPE, PacketSyncAssociation.CODEC, ACNetworking::handle);
+        reg.playToClient(PacketRenderBlockOutline.TYPE, PacketRenderBlockOutline.CODEC, ACNetworking::handle);
     }
 
     private static <T extends AbstractPacket> void handle(T message, IPayloadContext ctx) {

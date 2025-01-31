@@ -3,9 +3,9 @@ package dev.qther.ars_controle.block.tile;
 import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.config.ServerConfig;
-import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -31,7 +31,7 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     public static final UUID ZERO_UUID = new UUID(0, 0);
 
     public WarpingSpellPrismTile(BlockPos pos, BlockState state) {
-        super(ModRegistry.WARPING_SPELL_PRISM_TILE.get(), pos, state);
+        super(ACRegistry.Tiles.WARPING_SPELL_PRISM.get(), pos, state);
     }
 
     public @Nullable HitResult getHitResult() {

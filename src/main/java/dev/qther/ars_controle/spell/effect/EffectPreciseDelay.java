@@ -7,7 +7,7 @@ import com.hollingsworth.arsnouveau.common.network.Networking;
 import com.hollingsworth.arsnouveau.common.network.PacketClientDelayEffect;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentExtendTime;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModNames;
+import dev.qther.ars_controle.registry.ACNames;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -26,7 +26,7 @@ public class EffectPreciseDelay extends AbstractEffect {
     public static EffectPreciseDelay INSTANCE = new EffectPreciseDelay();
 
     private EffectPreciseDelay() {
-        super(ArsControle.prefix(ModNames.GLYPH_PRECISE_DELAY), "PreciseDelay");
+        super(ArsControle.prefix(ACNames.GLYPH_PRECISE_DELAY), "PreciseDelay");
     }
 
     public void sendPacket(Level world, HitResult rayTraceResult, @Nullable LivingEntity shooter, SpellContext spellContext, SpellStats spellStats, BlockHitResult blockResult, Entity hitEntity, SpellResolver spellResolver) {

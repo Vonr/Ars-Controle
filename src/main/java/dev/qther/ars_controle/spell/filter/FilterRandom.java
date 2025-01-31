@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentAmplify;
 import com.hollingsworth.arsnouveau.common.spell.augment.AugmentDampen;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModNames;
+import dev.qther.ars_controle.registry.ACNames;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -21,7 +21,7 @@ public class FilterRandom extends AbstractFilter {
     public double chance = BASE_CHANCE;
 
     private FilterRandom() {
-        super(ArsControle.prefix(ModNames.GLYPH_FILTER_RANDOM), "FilterRandom");
+        super(ArsControle.prefix(ACNames.GLYPH_FILTER_RANDOM), "FilterRandom");
     }
 
     @Override

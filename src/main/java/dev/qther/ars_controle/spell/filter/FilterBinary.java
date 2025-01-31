@@ -3,7 +3,7 @@ package dev.qther.ars_controle.spell.filter;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModNames;
+import dev.qther.ars_controle.registry.ACNames;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,9 +18,9 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class FilterBinary extends AbstractFilter implements IAdaptiveFilter {
-    public static final FilterBinary OR = new FilterBinary(ModNames.GLYPH_FILTER_OR, "FilterOr", (a, b) -> a.get() || b.get());
-    public static final FilterBinary XOR = new FilterBinary(ModNames.GLYPH_FILTER_XOR, "FilterXor", (a, b) -> a.get() != b.get());
-    public static final FilterBinary XNOR = new FilterBinary(ModNames.GLYPH_FILTER_XNOR, "FilterXnor", (a, b) -> a.get() == b.get());
+    public static final FilterBinary OR = new FilterBinary(ACNames.GLYPH_FILTER_OR, "FilterOr", (a, b) -> a.get() || b.get());
+    public static final FilterBinary XOR = new FilterBinary(ACNames.GLYPH_FILTER_XOR, "FilterXor", (a, b) -> a.get() != b.get());
+    public static final FilterBinary XNOR = new FilterBinary(ACNames.GLYPH_FILTER_XNOR, "FilterXnor", (a, b) -> a.get() == b.get());
 
     private final BiFunction<Supplier<Boolean>, Supplier<Boolean>, Boolean> op;
     public SpellResolver res;

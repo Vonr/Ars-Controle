@@ -2,7 +2,7 @@ package dev.qther.ars_controle.datagen;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
-import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.registry.ACRegistry;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -37,8 +37,8 @@ public class LootProvider extends LootTableProvider {
 
         @Override
         protected void generate() {
-            registerDropSelf(ModRegistry.WARPING_SPELL_PRISM_BLOCK);
-            registerDropSelf(ModRegistry.SCRYERS_LINKAGE_BLOCK);
+            registerDropSelf(ACRegistry.Blocks.WARPING_SPELL_PRISM);
+            registerDropSelf(ACRegistry.Blocks.SCRYERS_LINKAGE);
         }
 
         @Override

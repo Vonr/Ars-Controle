@@ -6,8 +6,8 @@ import com.hollingsworth.arsnouveau.common.items.ModItem;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.registry.ModRegistry;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -35,7 +35,7 @@ public class RemoteItem extends ModItem {
 
     @Override
     public @NotNull Component getName(ItemStack stack) {
-        var data = stack.get(ModRegistry.REMOTE_DATA);
+        var data = stack.get(ACRegistry.Components.REMOTE);
         if (data != null && !data.targetName.isEmpty()) {
             return Component.translatable("item.ars_controle.remote.with_target", Component.translatable(data.targetName));
         }
@@ -181,7 +181,7 @@ public class RemoteItem extends ModItem {
         }
 
         public static RemoteData fromItemStack(@NotNull ItemStack stack) {
-            return stack.getOrDefault(ModRegistry.REMOTE_DATA.get(), RemoteData.empty());
+            return stack.getOrDefault(ACRegistry.Components.REMOTE.get(), RemoteData.empty());
         }
 
         public static RemoteData fromBlock(@NotNull Block block, @NotNull GlobalPos pos) {
@@ -197,7 +197,7 @@ public class RemoteItem extends ModItem {
         }
 
         public RemoteData write(@NotNull ItemStack stack) {
-            return stack.set(ModRegistry.REMOTE_DATA, this);
+            return stack.set(ACRegistry.Components.REMOTE, this);
         }
     }
 }

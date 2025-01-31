@@ -1,7 +1,7 @@
 package dev.qther.ars_controle.datagen;
 
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.registry.ACRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -21,9 +21,9 @@ public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
     @Override
     protected void addTags(HolderLookup.@NotNull Provider pProvider) {
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
-                ModRegistry.WARPING_SPELL_PRISM_BLOCK.get(),
-                ModRegistry.SCRYERS_LINKAGE_BLOCK.get(),
-                ModRegistry.TEMPORAL_STABILITY_SENSOR.get()
+                ACRegistry.Blocks.WARPING_SPELL_PRISM.get(),
+                ACRegistry.Blocks.SCRYERS_LINKAGE.get(),
+                ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR.get()
         );
     }
 

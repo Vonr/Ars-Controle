@@ -2,7 +2,7 @@ package dev.qther.ars_controle.registry;
 
 import com.hollingsworth.arsnouveau.common.lib.GlyphLib;
 
-public class ModNames {
+public class ACNames {
     public static final String WARPING_SPELL_PRISM = "warping_spell_prism";
     public static final String SCRYERS_LINKAGE = "scryers_linkage";
     public static final String TEMPORAL_STABILITY_SENSOR = "temporal_stability_sensor";

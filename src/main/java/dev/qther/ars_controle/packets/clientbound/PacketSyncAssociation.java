@@ -2,7 +2,7 @@ package dev.qther.ars_controle.packets.clientbound;
 
 import com.hollingsworth.arsnouveau.common.network.AbstractPacket;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.AttachmentRegistry;
+import dev.qther.ars_controle.registry.ACRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -57,9 +57,9 @@ public final class PacketSyncAssociation extends AbstractPacket {
             return;
         }
         if (this.uuid != null) {
-            be.setData(AttachmentRegistry.ASSOCIATION, this.uuid);
+            be.setData(ACRegistry.Attachments.ASSOCIATION, this.uuid);
         } else {
-            be.removeData(AttachmentRegistry.ASSOCIATION);
+            be.removeData(ACRegistry.Attachments.ASSOCIATION);
         }
     }
 

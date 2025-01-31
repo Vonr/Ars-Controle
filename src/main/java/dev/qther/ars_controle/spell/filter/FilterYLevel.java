@@ -5,7 +5,7 @@ import com.hollingsworth.arsnouveau.api.spell.SpellContext;
 import com.hollingsworth.arsnouveau.api.spell.SpellResolver;
 import com.hollingsworth.arsnouveau.api.spell.SpellStats;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModNames;
+import dev.qther.ars_controle.registry.ACNames;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -13,9 +13,9 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.NotNull;
 
 public class FilterYLevel extends AbstractFilter {
-    public static final FilterYLevel ABOVE = new FilterYLevel(ModNames.GLYPH_FILTER_ABOVE, "FilterAbove", 1);
-    public static final FilterYLevel BELOW = new FilterYLevel(ModNames.GLYPH_FILTER_BELOW, "FilterBelow", -1);
-    public static final FilterYLevel LEVEL = new FilterYLevel(ModNames.GLYPH_FILTER_LEVEL, "FilterLevel", 0);
+    public static final FilterYLevel ABOVE = new FilterYLevel(ACNames.GLYPH_FILTER_ABOVE, "FilterAbove", 1);
+    public static final FilterYLevel BELOW = new FilterYLevel(ACNames.GLYPH_FILTER_BELOW, "FilterBelow", -1);
+    public static final FilterYLevel LEVEL = new FilterYLevel(ACNames.GLYPH_FILTER_LEVEL, "FilterLevel", 0);
 
     private final int comparison;
 

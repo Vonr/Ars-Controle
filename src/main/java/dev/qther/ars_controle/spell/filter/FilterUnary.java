@@ -3,7 +3,7 @@ package dev.qther.ars_controle.spell.filter;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
-import dev.qther.ars_controle.registry.ModNames;
+import dev.qther.ars_controle.registry.ACNames;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.booleans.Boolean2BooleanFunction;
 import net.minecraft.network.chat.Component;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FilterUnary extends AbstractFilter implements IAdaptiveFilter {
-    public static final FilterUnary NOT = new FilterUnary(ModNames.GLYPH_FILTER_NOT, "FilterNot", (a) -> !a);
+    public static final FilterUnary NOT = new FilterUnary(ACNames.GLYPH_FILTER_NOT, "FilterNot", (a) -> !a);
 
     private final Boolean2BooleanFunction op;
     public SpellResolver res;

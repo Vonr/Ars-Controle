@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
-import dev.qther.ars_controle.registry.AttachmentRegistry;
+import dev.qther.ars_controle.registry.ACRegistry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +36,7 @@ public class RitualEventQueueMixin {
 
     @Inject(method = "getRituals", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1))
     private static <T extends RangeRitual> void excludeRelayed(Level level, Class<T> type, CallbackInfoReturnable<List<T>> cir, @Local AbstractRitual ritual) {
-        if (ritual.tile.hasData(AttachmentRegistry.RELAY_UUID)) {
+        if (ritual.tile.hasData(ACRegistry.Attachments.RELAY_UUID)) {
             cir.cancel();
         }
     }
@@ -53,7 +53,7 @@ public class RitualEventQueueMixin {
 
     @WrapOperation(method = "getRitual", at = @At(value = "INVOKE", target = "Ljava/util/function/Predicate;test(Ljava/lang/Object;)Z"))
     private static boolean excludeRelayed2(Predicate instance, Object t, Operation<Boolean> original, @Local AbstractRitual ritual) {
-        if (ritual.tile.hasData(AttachmentRegistry.RELAY_UUID)) {
+        if (ritual.tile.hasData(ACRegistry.Attachments.RELAY_UUID)) {
             return false;
         }
         return original.call(instance, t);

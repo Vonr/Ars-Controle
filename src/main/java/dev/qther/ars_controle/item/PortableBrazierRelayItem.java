@@ -6,11 +6,10 @@ import com.hollingsworth.arsnouveau.common.items.ModItem;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.mixin.AbstractRitualInvoker;
 import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
-import dev.qther.ars_controle.registry.AttachmentRegistry;
-import dev.qther.ars_controle.registry.ModRegistry;
 import dev.qther.ars_controle.util.RenderQueue;
 import dev.qther.ars_controle.util.RenderUtil;
 import net.minecraft.client.Minecraft;
@@ -62,7 +61,7 @@ public class PortableBrazierRelayItem extends ModItem {
         rituals.clear();
         for (var player : server.getPlayerList().getPlayers()) {
             for (var stack : player.getInventory().items) {
-                if (stack.is(ModRegistry.PORTABLE_BRAZIER_RELAY.asItem())) {
+                if (stack.is(ACRegistry.Items.PORTABLE_BRAZIER_RELAY.asItem())) {
                     var data = PortableBrazierRelayData.fromItemStack(stack);
                     if (data.pos.isPresent()) {
                         var level = Cached.getLevelByName(server.getAllLevels(), data.pos.get().dimension().location().toString());
@@ -92,7 +91,7 @@ public class PortableBrazierRelayItem extends ModItem {
 
     @Override
     public @NotNull Component getName(ItemStack stack) {
-        var data = stack.get(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+        var data = stack.get(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
         if (data != null && !data.ritualName.isEmpty()) {
             return Component.translatable("item.ars_controle.portable_brazier_relay.with_ritual", Component.translatable(data.ritualName));
         }
@@ -121,16 +120,16 @@ public class PortableBrazierRelayItem extends ModItem {
 
         var currentBrazier = getBrazier(level, player, stack);
         if (currentBrazier != null) {
-            currentBrazier.removeData(AttachmentRegistry.RELAY_UUID);
-            currentBrazier.removeData(AttachmentRegistry.ASSOCIATION);
+            currentBrazier.removeData(ACRegistry.Attachments.RELAY_UUID);
+            currentBrazier.removeData(ACRegistry.Attachments.ASSOCIATION);
             PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(currentBrazier.getBlockPos()), new PacketSyncAssociation(relayData.pos.get(), null));
         }
 
-        var existingData = be.getExistingData(AttachmentRegistry.RELAY_UUID);
+        var existingData = be.getExistingData(ACRegistry.Attachments.RELAY_UUID);
         if (existingData.isPresent() && relayData.uuid.isPresent() && existingData.get().equals(relayData.uuid.get())) {
-            stack.remove(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
-            brazier.removeData(AttachmentRegistry.RELAY_UUID);
-            brazier.removeData(AttachmentRegistry.ASSOCIATION);
+            stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
+            brazier.removeData(ACRegistry.Attachments.RELAY_UUID);
+            brazier.removeData(ACRegistry.Attachments.ASSOCIATION);
             PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(brazier.getBlockPos()), new PacketSyncAssociation(new GlobalPos(level.dimension(), pos), null));
 
             PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.target.set.none"));
@@ -139,8 +138,8 @@ public class PortableBrazierRelayItem extends ModItem {
             @SuppressWarnings("OptionalGetWithoutIsPresent")
             var uuid = data.uuid.get();
             data.write(stack);
-            brazier.setData(AttachmentRegistry.RELAY_UUID, uuid);
-            brazier.setData(AttachmentRegistry.ASSOCIATION, player.getUUID());
+            brazier.setData(ACRegistry.Attachments.RELAY_UUID, uuid);
+            brazier.setData(ACRegistry.Attachments.ASSOCIATION, player.getUUID());
             PacketDistributor.sendToPlayersTrackingChunk(level, new ChunkPos(brazier.getBlockPos()), new PacketSyncAssociation(new GlobalPos(level.dimension(), pos), player.getUUID()));
 
             PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.target.set.block", pos.toShortString(), level.dimension().location().toString()));
@@ -161,7 +160,7 @@ public class PortableBrazierRelayItem extends ModItem {
                 return;
             }
 
-            var data = stack.get(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+            var data = stack.get(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
             if (data != null && data.pos.isPresent() && data.pos.get().dimension().equals(level.dimension())) {
                 RenderQueue.enqueue(RenderQueue.RenderTask.until((event) -> {
                     if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
@@ -186,16 +185,16 @@ public class PortableBrazierRelayItem extends ModItem {
             }
 
             var regName = brazier.ritual.getRegistryName();
-            var data = stack.get(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+            var data = stack.get(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
             if (data != null) {
                 var ritualName = "item." + regName.getNamespace() + "." + regName.getPath();
                 if (!data.ritualName.equals(ritualName)) {
-                    stack.set(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA, PortableBrazierRelayData.of(data.pos().get(), ritualName));
+                    stack.set(ACRegistry.Components.PORTABLE_BRAZIER_RELAY, PortableBrazierRelayData.of(data.pos().get(), ritualName));
                 }
 
-                var brazierAssoc = brazier.getExistingData(AttachmentRegistry.ASSOCIATION);
+                var brazierAssoc = brazier.getExistingData(ACRegistry.Attachments.ASSOCIATION);
                 if (brazierAssoc.isEmpty() || !brazierAssoc.get().equals(entity.getUUID())) {
-                    brazier.setData(AttachmentRegistry.ASSOCIATION, entity.getUUID());
+                    brazier.setData(ACRegistry.Attachments.ASSOCIATION, entity.getUUID());
                     PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(brazier.getBlockPos()), new PacketSyncAssociation(new GlobalPos(serverLevel.dimension(), brazier.getBlockPos()), entity.getUUID()));
                 }
             }
@@ -224,7 +223,7 @@ public class PortableBrazierRelayItem extends ModItem {
         var targetLevel = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim.location().toString());
         if (targetLevel == null) {
             PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.remote.error.invalid_dimension"));
-            stack.remove(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+            stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
             return null;
         }
 
@@ -235,12 +234,12 @@ public class PortableBrazierRelayItem extends ModItem {
         var be = targetLevel.getBlockEntity(targetPos);
         if (!(be instanceof RitualBrazierTile brazier)) {
             PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.remote.error.invalid_target"));
-            stack.remove(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+            stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
             return null;
         }
 
-        if (brazier.ritual == null || (entity != null && !brazier.getExistingData(AttachmentRegistry.RELAY_UUID).map(u -> data.uuid.get().equals(u)).orElse(false))) {
-            stack.remove(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA);
+        if (brazier.ritual == null || (entity != null && !brazier.getExistingData(ACRegistry.Attachments.RELAY_UUID).map(u -> data.uuid.get().equals(u)).orElse(false))) {
+            stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
             return null;
         }
 
@@ -296,11 +295,11 @@ public class PortableBrazierRelayItem extends ModItem {
         }
 
         public static PortableBrazierRelayData fromItemStack(@NotNull ItemStack stack) {
-            return stack.getOrDefault(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA.get(), PortableBrazierRelayData.empty());
+            return stack.getOrDefault(ACRegistry.Components.PORTABLE_BRAZIER_RELAY.get(), PortableBrazierRelayData.empty());
         }
 
         public PortableBrazierRelayData write(@NotNull ItemStack stack) {
-            return stack.set(ModRegistry.PORTABLE_BRAZIER_RELAY_DATA, this);
+            return stack.set(ACRegistry.Components.PORTABLE_BRAZIER_RELAY, this);
         }
     }
 }
