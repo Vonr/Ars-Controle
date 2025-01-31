@@ -5,7 +5,7 @@ import com.hollingsworth.arsnouveau.common.block.CraftingLecternBlock;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
-import dev.qther.ars_controle.Cached;
+import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.block.ScryersLinkageBlock;
 import dev.qther.ars_controle.registry.ModRegistry;
 import it.unimi.dsi.fastutil.Pair;

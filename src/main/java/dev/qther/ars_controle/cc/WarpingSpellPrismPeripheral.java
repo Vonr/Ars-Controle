@@ -3,7 +3,7 @@ package dev.qther.ars_controle.cc;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import dev.qther.ars_controle.Cached;
+import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;

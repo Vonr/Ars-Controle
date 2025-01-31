@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualBrazierTile;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.qther.ars_controle.Cached;
+import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.registry.AttachmentRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

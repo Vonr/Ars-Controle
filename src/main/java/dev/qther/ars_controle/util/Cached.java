@@ -1,4 +1,4 @@
-package dev.qther.ars_controle;
+package dev.qther.ars_controle.util;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

@@ -8,6 +8,7 @@ import dev.qther.ars_controle.packets.ModNetworking;
 import dev.qther.ars_controle.registry.ArsNouveauRegistry;
 import dev.qther.ars_controle.registry.AttachmentRegistry;
 import dev.qther.ars_controle.registry.ModRegistry;
+import dev.qther.ars_controle.util.Cached;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
