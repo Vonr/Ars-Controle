@@ -65,7 +65,7 @@ public class RemoteItem extends ModItem {
 
         var data = RemoteData.fromItemStack(stack);
         if (data.isEmpty()) {
-            if (player.isCrouching()) {
+            if (player.isShiftKeyDown()) {
                 if (level.getBlockEntity(blockPos) instanceof IWandable) {
                     RemoteData.fromBlock(block, GlobalPos.of(level.dimension(), blockPos)).write(stack);
                     PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
@@ -118,7 +118,7 @@ public class RemoteItem extends ModItem {
         var stack = player.getItemInHand(hand);
         var data = RemoteData.fromItemStack(stack);
         if (data.isEmpty()) {
-            if (player.isCrouching()) {
+            if (player.isShiftKeyDown()) {
                 if (entity.isAlive() && entity instanceof IWandable) {
                     RemoteData.fromEntity(entity).write(stack);
                     PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", entity.getDisplayName(), level.dimension().location().toString()));

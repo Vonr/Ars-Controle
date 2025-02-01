@@ -62,7 +62,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             return InteractionResult.FAIL;
         }
 
-        if (player.isCrouching()) {
+        if (player.isShiftKeyDown()) {
             tile.setEntityUUID(player.getUUID());
             tile.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.self"));
