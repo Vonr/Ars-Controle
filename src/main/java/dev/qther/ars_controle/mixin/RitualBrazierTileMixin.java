@@ -7,7 +7,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,9 +23,8 @@ import java.util.Optional;
 
 @Mixin(value = RitualBrazierTile.class, remap = false)
 public abstract class RitualBrazierTileMixin extends BlockEntity {
-    @Shadow public abstract void tick();
-
-    @Shadow public AbstractRitual ritual;
+    @Shadow
+    public AbstractRitual ritual;
 
     public RitualBrazierTileMixin(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -62,18 +60,14 @@ public abstract class RitualBrazierTileMixin extends BlockEntity {
             try {
                 var uuid = data.get();
                 String name = null;
-                var player = Minecraft.getInstance().player;
-                if (player != null && uuid.equals(player.getUUID())) {
-                    name = player.getGameProfile().getName();
-                } else {
-                    var profile = Cached.getGameProfileFromUUID(uuid).getNow(Optional.empty());
-                    if (profile.isPresent()) {
-                        name = profile.get().getName();
-                    }
+                var profile = Cached.getGameProfileFromUUID(uuid).getNow(Optional.empty());
+                if (profile.isPresent()) {
+                    name = profile.get().getName();
                 }
 
                 tooltips.add(Component.translatable("ars_controle.portable_brazier_relay.relayed_to", name != null ? name : uuid.toString()).withStyle(ChatFormatting.GOLD));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 }
