@@ -1,11 +1,13 @@
 package dev.qther.ars_controle.item;
 
+import com.hollingsworth.arsnouveau.api.registry.RitualRegistry;
 import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualBrazierTile;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.qther.ars_controle.datagen.ItemTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.mixin.AbstractRitualInvoker;
@@ -15,6 +17,7 @@ import dev.qther.ars_controle.util.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -115,6 +118,14 @@ public class PortableBrazierRelayItem extends ModItem {
             return super.useOn(context);
         }
 
+        if (brazier.ritual != null) {
+            var tablet = RitualRegistry.getRitualItemMap().get(brazier.ritual.getRegistryName());
+            if (tablet != null && BuiltInRegistries.ITEM.wrapAsHolder(tablet).is(ItemTagProvider.RITUAL_BLACKLIST)) {
+                PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(tablet.getDescriptionId())));
+                return InteractionResult.FAIL;
+            }
+        }
+
         var stack = context.getItemInHand();
         var relayData = PortableBrazierRelayData.fromItemStack(stack);
 
@@ -156,7 +167,7 @@ public class PortableBrazierRelayItem extends ModItem {
             var player = Minecraft.getInstance().player;
             if (player == null
                 || (!ItemStack.isSameItemSameComponents(stack, player.getMainHandItem())
-                && !ItemStack.isSameItemSameComponents(stack, player.getOffhandItem()))) {
+                    && !ItemStack.isSameItemSameComponents(stack, player.getOffhandItem()))) {
                 return;
             }
 
@@ -243,6 +254,13 @@ public class PortableBrazierRelayItem extends ModItem {
             return null;
         }
 
+        var tablet = RitualRegistry.getRitualItemMap().get(brazier.ritual.getRegistryName());
+        if (tablet != null && BuiltInRegistries.ITEM.wrapAsHolder(tablet).is(ItemTagProvider.RITUAL_BLACKLIST)) {
+            PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(tablet.getDescriptionId())));
+            stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
+            return null;
+        }
+
         return brazier;
     }
 
@@ -259,7 +277,8 @@ public class PortableBrazierRelayItem extends ModItem {
         }
     }
 
-    public record PortableBrazierRelayData(@NotNull Optional<GlobalPos> pos, @NotNull Optional<UUID> uuid, String ritualName) {
+    public record PortableBrazierRelayData(@NotNull Optional<GlobalPos> pos, @NotNull Optional<UUID> uuid,
+                                           String ritualName) {
         public static final Codec<PortableBrazierRelayData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 GlobalPos.CODEC.optionalFieldOf("pos").forGetter(PortableBrazierRelayData::pos),
                 UUIDUtil.CODEC.optionalFieldOf("uuid").forGetter(PortableBrazierRelayData::uuid),
