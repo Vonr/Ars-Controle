@@ -1,18 +1,17 @@
 package dev.qther.ars_controle.block.tile;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
-import com.hollingsworth.arsnouveau.common.block.CraftingLecternBlock;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
-import com.hollingsworth.arsnouveau.common.block.tile.StorageLecternTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.datagen.BlockTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.block.ScryersLinkageBlock;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -56,7 +55,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         }
 
         var block = targetLevel.getBlockState(targetPos).getBlock();
-        if (block instanceof ScryersLinkageBlock || block instanceof CraftingLecternBlock) {
+        if (BuiltInRegistries.BLOCK.wrapAsHolder(block).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             this.removeBlock();
             return null;
         }
@@ -80,7 +79,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
         }
 
         var target = level.getBlockState(block);
-        if (target.getBlock() instanceof ScryersLinkageBlock || target.getBlock() instanceof CraftingLecternBlock) {
+        if (BuiltInRegistries.BLOCK.wrapAsHolder(target.getBlock()).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             return false;
         }
 
@@ -217,7 +216,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
             serverLevel.getChunkSource().addRegionTicket(TICKET_TYPE, loadPos, 1, loadPos, true);
         }
         var be = level.getBlockEntity(pos);
-        if (be == null || be instanceof ScryersLinkageTile || be instanceof StorageLecternTile) {
+        if (be == null || BuiltInRegistries.BLOCK.wrapAsHolder(be.getBlockState().getBlock()).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             return null;
         }
 
