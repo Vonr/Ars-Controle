@@ -34,10 +34,13 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
+          cache: gradle
+          cache-dependency-path: |
+            *.gradle
+            gradle.*
+            gradle/wrapper/gradle-wrapper.properties
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
       - name: Build with Gradle
         run: ./gradlew build
       - name: Generate changelog
