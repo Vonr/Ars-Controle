@@ -69,7 +69,6 @@ public class ArsControle {
     }
 
     public static void onServerStopped(ServerStoppedEvent event) {
-        Cached.LEVELS_BY_NAME.clear();
         Cached.ENTITIES_BY_UUID.invalidateAll();
         PortableBrazierRelayItem.clearCache();
     }

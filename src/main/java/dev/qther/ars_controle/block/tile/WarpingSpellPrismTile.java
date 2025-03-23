@@ -89,7 +89,7 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
             if (s == null || level == null) {
                 return null;
             }
-            return Cached.getLevelByName(level.getServer().getAllLevels(), s);
+            return Cached.getLevelByName(s);
         }
 
         var entity = this.getEntity();

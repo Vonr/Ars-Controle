@@ -67,7 +67,7 @@ public class PortableBrazierRelayItem extends ModItem {
                 if (stack.is(ACRegistry.Items.PORTABLE_BRAZIER_RELAY.asItem())) {
                     var data = PortableBrazierRelayData.fromItemStack(stack);
                     if (data.pos.isPresent()) {
-                        var level = Cached.getLevelByName(server.getAllLevels(), data.pos.get().dimension().location().toString());
+                        var level = Cached.getLevelByKey(data.pos.get().dimension());
                         if (level == null) {
                             continue;
                         }
@@ -231,7 +231,7 @@ public class PortableBrazierRelayItem extends ModItem {
         var targetDim = target.dimension();
         var targetPos = target.pos();
 
-        var targetLevel = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim.location().toString());
+        var targetLevel = Cached.getLevelByKey(targetDim);
         if (targetLevel == null) {
             PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.remote.error.invalid_dimension"));
             stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);

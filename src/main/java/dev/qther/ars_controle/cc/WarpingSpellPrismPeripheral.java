@@ -46,7 +46,7 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
     }
 
     public final void setTarget(String level, BlockPos pos) throws LuaException {
-        var l = Cached.getLevelByName(this.owner.getLevel().getServer().getAllLevels(), level);
+        var l = Cached.getLevelByName(level);
         if (l == null) {
             throw new LuaException("Invalid level: " + level);
         }

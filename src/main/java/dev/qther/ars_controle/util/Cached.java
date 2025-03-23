@@ -4,14 +4,17 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ReferenceArrayMap;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -19,26 +22,26 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class Cached {
-    public static final Map<String, WeakReference<ServerLevel>> LEVELS_BY_NAME = new Object2ReferenceArrayMap<>(8);
-
-    public static @Nullable ServerLevel getLevelByName(@NotNull Iterable<ServerLevel> levels, @NotNull String name) {
-        if (LEVELS_BY_NAME.containsKey(name)) {
-            var l = LEVELS_BY_NAME.get(name).get();
-            if (l != null) {
-                return l;
-            }
+    public static @Nullable ServerLevel getLevelByName(@NotNull String name) {
+        var loc = ResourceLocation.tryParse(name);
+        if (loc == null) {
+            return null;
         }
 
-        for (var l : levels) {
-            if (!name.equals(l.dimension().location().toString())) {
-                continue;
-            }
+        return getLevelByLoc(loc);
+    }
 
-            LEVELS_BY_NAME.put(name, new WeakReference<>(l));
-            return l;
+    public static @Nullable ServerLevel getLevelByLoc(@NotNull ResourceLocation loc) {
+        return getLevelByKey(ResourceKey.create(Registries.DIMENSION, loc));
+    }
+
+    public static @Nullable ServerLevel getLevelByKey(@NotNull ResourceKey<Level> key) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return null;
         }
 
-        return null;
+        return server.getLevel(key);
     }
 
     public static final Cache<UUID, Entity> ENTITIES_BY_UUID = CacheBuilder.newBuilder().weakValues()

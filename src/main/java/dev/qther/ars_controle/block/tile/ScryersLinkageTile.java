@@ -138,7 +138,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
             return null;
         }
 
-        return Cached.getLevelByName(level.getServer().getAllLevels(), s);
+        return Cached.getLevelByName(s);
     }
 
     private @Nullable BlockPos getTargetBlock() {
@@ -167,12 +167,11 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
 
     @Override
     public void onFinishedConnectionLast(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
-        if (!(player instanceof ServerPlayer sp)) {
+        if (!(player instanceof ServerPlayer)) {
             return;
         }
         if (storedPos != null) {
-            var server = sp.getServer();
-            var level = Cached.getLevelByName(server.getAllLevels(), storedPos.dimension().location().toString());
+            var level = Cached.getLevelByKey(storedPos.dimension());
 
             if (level == null) {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));

@@ -86,7 +86,7 @@ public class RemoteItem extends ModItem {
             var targetPos = globalPos.pos();
             var targetDim = globalPos.dimension();
 
-            var targetLevel = Cached.getLevelByName(server.getAllLevels(), targetDim.location().toString());
+            var targetLevel = Cached.getLevelByKey(targetDim);
             if (targetLevel == null) {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
                 return InteractionResult.FAIL;
@@ -138,7 +138,7 @@ public class RemoteItem extends ModItem {
             var targetPos = globalPos.pos();
             var targetDim = globalPos.dimension();
 
-            var targetLevel = Cached.getLevelByName(level.getServer().getAllLevels(), targetDim.location().toString());
+            var targetLevel = Cached.getLevelByKey(targetDim);
             if (targetLevel == null) {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
                 return InteractionResult.FAIL;
