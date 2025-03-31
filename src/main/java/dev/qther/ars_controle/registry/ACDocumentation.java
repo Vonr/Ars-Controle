@@ -4,7 +4,9 @@ import com.hollingsworth.arsnouveau.api.documentation.DocCategory;
 import com.hollingsworth.arsnouveau.api.documentation.ReloadDocumentationEvent;
 import com.hollingsworth.arsnouveau.api.documentation.builder.DocEntryBuilder;
 import com.hollingsworth.arsnouveau.api.documentation.entry.DocEntry;
+import com.hollingsworth.arsnouveau.api.documentation.entry.GlyphEntry;
 import com.hollingsworth.arsnouveau.api.registry.DocumentationRegistry;
+import com.hollingsworth.arsnouveau.api.registry.GlyphRegistry;
 import com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart;
 import com.hollingsworth.arsnouveau.api.spell.SpellSchool;
 import com.hollingsworth.arsnouveau.setup.registry.*;
@@ -12,6 +14,7 @@ import dev.qther.ars_controle.ArsControle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,44 +26,28 @@ import static com.hollingsworth.arsnouveau.api.registry.DocumentationRegistry.*;
 public class ACDocumentation {
     @SubscribeEvent
     public static void addPages(ReloadDocumentationEvent.AddEntries event) {
-        for (var glyph : ACRegistry.Glyphs.registeredSpells) {
-            var entry = addPage(EntryBuilder.of(glyph)
-                    .withName("ars_controle.glyph_name." + glyph.getRegistryName().getPath())
-                    .withIcon(glyph.glyphItem)
-                    .withCraftingPages(glyph.glyphItem));
-
-            entry.withSearchTag(Component.translatable("ars_nouveau.keyword.glyph"));
-
-            for (SpellSchool school : glyph.spellSchools){
-                entry.withSearchTag(school.getTextComponent());
-                for (SpellSchool subschool : school.getSubSchools()) {
-                    entry.withSearchTag(subschool.getTextComponent());
-                }
-            }
-        }
-
         addPage(EntryBuilder.of(CRAFTING, ACRegistry.Blocks.WARPING_SPELL_PRISM)
-                        .withIcon(ACRegistry.Blocks.WARPING_SPELL_PRISM)
-                        .withTextPage("ars_controle.page1.warping_spell_prism")
-                        .withCraftingPages(ACRegistry.Blocks.WARPING_SPELL_PRISM))
+                .withIcon(ACRegistry.Blocks.WARPING_SPELL_PRISM)
+                .withTextPage("ars_controle.page1.warping_spell_prism")
+                .withCraftingPages(ACRegistry.Blocks.WARPING_SPELL_PRISM))
                 .withRelation(block(BlockRegistry.SPELL_PRISM));
 
         addPage(EntryBuilder.of(CRAFTING, ACRegistry.Blocks.SCRYERS_LINKAGE)
-                        .withIcon(ACRegistry.Blocks.SCRYERS_LINKAGE)
-                        .withTextPage("ars_controle.page1.scryers_linkage")
-                        .withCraftingPages(ACRegistry.Blocks.SCRYERS_LINKAGE));
+                .withIcon(ACRegistry.Blocks.SCRYERS_LINKAGE)
+                .withTextPage("ars_controle.page1.scryers_linkage")
+                .withCraftingPages(ACRegistry.Blocks.SCRYERS_LINKAGE));
 
 
         addPage(EntryBuilder.of(CRAFTING, ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR)
-                        .withIcon(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR)
-                        .withTextPage("ars_controle.page1.temporal_stability_sensor")
-                        .withCraftingPages(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR));
+                .withIcon(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR)
+                .withTextPage("ars_controle.page1.temporal_stability_sensor")
+                .withCraftingPages(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR));
 
         addPage(EntryBuilder.of(CRAFTING, ACRegistry.Items.REMOTE)
-                        .withIcon(ACRegistry.Items.REMOTE)
-                        .withTextPage("ars_controle.page1.remote")
-                        .withTextPage("ars_controle.page2.remote")
-                        .withCraftingPages(ACRegistry.Items.REMOTE))
+                .withIcon(ACRegistry.Items.REMOTE)
+                .withTextPage("ars_controle.page1.remote")
+                .withTextPage("ars_controle.page2.remote")
+                .withCraftingPages(ACRegistry.Items.REMOTE))
                 .withRelation(item(ItemsRegistry.DOMINION_ROD));
 
         addPage(EntryBuilder.of(ITEMS, ACRegistry.Items.PORTABLE_BRAZIER_RELAY)
