@@ -18,16 +18,23 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class FilterBinary extends AbstractFilter implements IAdaptiveFilter {
-    public static final FilterBinary OR = new FilterBinary(ACNames.GLYPH_FILTER_OR, "FilterOr", (a, b) -> a.get() || b.get());
-    public static final FilterBinary XOR = new FilterBinary(ACNames.GLYPH_FILTER_XOR, "FilterXor", (a, b) -> a.get() != b.get());
-    public static final FilterBinary XNOR = new FilterBinary(ACNames.GLYPH_FILTER_XNOR, "FilterXnor", (a, b) -> a.get() == b.get());
+    public static final FilterBinary OR = new FilterBinary(ACNames.GLYPH_FILTER_OR, "Filter: OR", "Only resolves the spell if any of the next 2 Filters are true.", (a, b) -> a.get() || b.get());
+    public static final FilterBinary XOR = new FilterBinary(ACNames.GLYPH_FILTER_XOR, "Filter: XOR", "Only resolves the spell if only one of the next 2 Filters are true.", (a, b) -> a.get() != b.get());
+    public static final FilterBinary XNOR = new FilterBinary(ACNames.GLYPH_FILTER_XNOR, "Filter: XNOR", "Only resolves the spell if the result of both the next 2 Filters are equal.", (a, b) -> a.get() == b.get());
 
     private final BiFunction<Supplier<Boolean>, Supplier<Boolean>, Boolean> op;
     public SpellResolver res;
+    private final String bookDescription;
 
-    private FilterBinary(String id, String desc, BiFunction<Supplier<Boolean>, Supplier<Boolean>, Boolean> op) {
-        super(ArsControle.prefix(id), desc);
+    private FilterBinary(String id, String name, String bookDescription, BiFunction<Supplier<Boolean>, Supplier<Boolean>, Boolean> op) {
+        super(ArsControle.prefix(id), name);
         this.op = op;
+        this.bookDescription = bookDescription;
+    }
+
+    @Override
+    public String getBookDescription() {
+        return this.bookDescription;
     }
 
     @Override

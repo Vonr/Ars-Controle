@@ -1,5 +1,6 @@
 package dev.qther.ars_controle.datagen;
 
+import dev.qther.ars_controle.ArsControle;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 public class Setup {
@@ -8,6 +9,8 @@ public class Setup {
         var output = event.getGenerator().getPackOutput();
         var provider = event.getLookupProvider();
         var fileHelper = event.getExistingFileHelper();
+
+        gen.addProvider(event.includeClient(), new LangDatagen(output, ArsControle.MODID, "en_us"));
 
         gen.addProvider(event.includeServer(), new ArsProviders.ImbuementProvider(gen));
         gen.addProvider(event.includeServer(), new ArsProviders.GlyphProvider(gen));

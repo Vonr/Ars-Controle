@@ -26,7 +26,12 @@ public class EffectPreciseDelay extends AbstractEffect {
     public static EffectPreciseDelay INSTANCE = new EffectPreciseDelay();
 
     private EffectPreciseDelay() {
-        super(ArsControle.prefix(ACNames.GLYPH_PRECISE_DELAY), "PreciseDelay");
+        super(ArsControle.prefix(ACNames.GLYPH_PRECISE_DELAY), "Precise Delay");
+    }
+
+    @Override
+    public String getBookDescription() {
+        return "Delays the remainder of the spell by (2 ^ Extend Time Augments) ticks.";
     }
 
     public void sendPacket(Level world, HitResult rayTraceResult, @Nullable LivingEntity shooter, SpellContext spellContext, SpellStats spellStats, BlockHitResult blockResult, Entity hitEntity, SpellResolver spellResolver) {
@@ -75,8 +80,14 @@ public class EffectPreciseDelay extends AbstractEffect {
     }
 
     @Override
-    public String getBookDescription() {
-        return "Delays the remainder of the spell by (2 ^ Extend Time Augments) ticks";
+    protected void addAugmentCostOverrides(Map<ResourceLocation, Integer> defaults) {
+        defaults.put(AugmentExtendTime.INSTANCE.getRegistryName(), 0);
+    }
+
+    @Override
+    public void addAugmentDescriptions(Map<AbstractAugment, String> map) {
+        super.addAugmentDescriptions(map);
+        map.put(AugmentExtendTime.INSTANCE, "Doubles the delay");
     }
 
     @Override

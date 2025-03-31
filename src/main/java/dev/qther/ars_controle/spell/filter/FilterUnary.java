@@ -16,14 +16,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FilterUnary extends AbstractFilter implements IAdaptiveFilter {
-    public static final FilterUnary NOT = new FilterUnary(ACNames.GLYPH_FILTER_NOT, "FilterNot", (a) -> !a);
+    public static final FilterUnary NOT = new FilterUnary(ACNames.GLYPH_FILTER_NOT, "Filter: NOT", "Only resolves the spell if the result of the next Filter is false.", (a) -> !a);
 
     private final Boolean2BooleanFunction op;
     public SpellResolver res;
+    private final String bookDescription;
 
-    private FilterUnary(String id, String desc, Boolean2BooleanFunction op) {
-        super(ArsControle.prefix(id), desc);
+    private FilterUnary(String id, String name, String bookDescription, Boolean2BooleanFunction op) {
+        super(ArsControle.prefix(id), name);
         this.op = op;
+        this.bookDescription = bookDescription;
+    }
+
+    @Override
+    public String getBookDescription() {
+        return this.bookDescription;
     }
 
     @Override

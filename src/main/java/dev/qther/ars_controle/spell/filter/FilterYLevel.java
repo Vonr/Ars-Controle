@@ -13,17 +13,25 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.NotNull;
 
 public class FilterYLevel extends AbstractFilter {
-    public static final FilterYLevel ABOVE = new FilterYLevel(ACNames.GLYPH_FILTER_ABOVE, "FilterAbove", 1);
-    public static final FilterYLevel BELOW = new FilterYLevel(ACNames.GLYPH_FILTER_BELOW, "FilterBelow", -1);
-    public static final FilterYLevel LEVEL = new FilterYLevel(ACNames.GLYPH_FILTER_LEVEL, "FilterLevel", 0);
+    public static final FilterYLevel ABOVE = new FilterYLevel(ACNames.GLYPH_FILTER_ABOVE, "Filter: Above", "Only resolves the spell above the caster.", 1);
+    public static final FilterYLevel BELOW = new FilterYLevel(ACNames.GLYPH_FILTER_BELOW, "Filter: Below", "Only resolves the spell below the caster.", -1);
+    public static final FilterYLevel LEVEL = new FilterYLevel(ACNames.GLYPH_FILTER_LEVEL, "Filter: Level", "Only resolves the spell at the caster's elevation.", 0);
 
     private final int comparison;
 
     protected int y;
 
-    private FilterYLevel(String tag, String description, int comparison) {
-        super(ArsControle.prefix(tag), description);
+    private final String bookDescription;
+
+    private FilterYLevel(String tag, String name, String bookDescription, int comparison) {
+        super(ArsControle.prefix(tag), name);
         this.comparison = comparison;
+        this.bookDescription = bookDescription;
+    }
+
+    @Override
+    public String getBookDescription() {
+        return this.bookDescription;
     }
 
     @Override
