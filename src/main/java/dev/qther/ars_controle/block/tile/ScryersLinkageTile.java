@@ -166,24 +166,29 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
     }
 
     @Override
-    public void onFinishedConnectionLast(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
+    public Result onLastConnection(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
         if (!(player instanceof ServerPlayer)) {
-            return;
+            return Result.FAIL;
         }
-        if (storedPos != null) {
-            var level = Cached.getLevelByKey(storedPos.dimension());
 
-            if (level == null) {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
-                return;
-            }
-
-            if (this.setBlock(level, storedPos.pos())) {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.pos().toShortString(), level.dimension().location().toString()));
-            } else {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
-            }
+        if (storedPos == null) {
+            return Result.FAIL;
         }
+
+        var level = Cached.getLevelByKey(storedPos.dimension());
+
+        if (level == null) {
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
+            return Result.FAIL;
+        }
+
+        if (!this.setBlock(level, storedPos.pos())) {
+            PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
+            return Result.FAIL;
+        }
+
+        PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.pos().toShortString(), level.dimension().location().toString()));
+        return Result.SUCCESS;
     }
 
     @Override

@@ -177,19 +177,22 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
     }
 
     @Override
-    public void onFinishedConnectionLast(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
+    public Result onLastConnection(@Nullable GlobalPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
         if (storedPos != null) {
             this.setBlock(storedPos.dimension(), storedPos.pos());
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.pos().toShortString(), storedPos.dimension().location().toString()));
-            return;
+            return Result.SUCCESS;
         }
 
         if (storedEntity != null) {
             this.setEntityUUID(storedEntity.getUUID());
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));
+            return Result.SUCCESS;
         }
+
+        return Result.FAIL;
     }
 
     @Override

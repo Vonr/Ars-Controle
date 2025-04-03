@@ -94,13 +94,13 @@ public class RemoteItem extends ModItem {
 
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(new GlobalPos(level.dimension(), blockPos), null, null, player);
+                wandable.onLastConnection(new GlobalPos(level.dimension(), blockPos), null, null, player);
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast(new GlobalPos(level.dimension(), blockPos), null, null, player);
+                wandable.onFirstConnection(new GlobalPos(level.dimension(), blockPos), null, null, player);
                 return InteractionResult.CONSUME;
             }
         }
@@ -146,14 +146,14 @@ public class RemoteItem extends ModItem {
 
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast((GlobalPos) null, null, entity, player);
+                wandable.onLastConnection(null, null, entity, player);
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onFinishedConnectionLast((GlobalPos) null, null, entity, player);
+                wandable.onLastConnection(null, null, entity, player);
                 return InteractionResult.CONSUME;
             }
         }
