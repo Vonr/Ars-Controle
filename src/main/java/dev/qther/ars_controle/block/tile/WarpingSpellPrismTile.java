@@ -1,6 +1,7 @@
 package dev.qther.ars_controle.block.tile;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
+import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.registry.ACRegistry;
@@ -25,9 +26,10 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
-public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
+public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDimensionalHighlighter {
     public static final UUID ZERO_UUID = new UUID(0, 0);
 
     public WarpingSpellPrismTile(BlockPos pos, BlockState state) {
@@ -50,7 +52,7 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
         Entity entity = null;
         if (tag.hasUUID("entity")) {
             var uuid = tag.getUUID("entity");
-            entity = Cached.getEntityByUUID(level.getServer().getAllLevels(), uuid);
+            entity = Cached.getEntityByUUID(uuid);
         }
 
         if (entity == null) {
@@ -123,7 +125,7 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
 
     public @Nullable Entity getEntity() {
         var uuid = getEntityUUID();
-        return uuid == ZERO_UUID ? null : Cached.getEntityByUUID(level.getServer().getAllLevels(), uuid);
+        return uuid == ZERO_UUID ? null : Cached.getEntityByUUID(uuid);
     }
 
     public int getSourceRequired(HitResult hitResult) {
@@ -210,5 +212,23 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable {
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));
         }
+    }
+
+    @Override
+    public List<ColorPos> getWandHighlight(List<ColorPos> list) {
+        var target = this.getHitResult();
+        return target == null ? List.of() : List.of(new ColorPos(target.getLocation()));
+    }
+
+    @Override
+    public List<ColorPos> getWandHighlight(Level level, List<ColorPos> list) {
+        var dim = this.getTargetLevel();
+        if (dim == level) {
+            var target = this.getHitResult();
+            if (target != null) {
+                list.add(new ColorPos(target.getLocation()));
+            }
+        }
+        return list;
     }
 }

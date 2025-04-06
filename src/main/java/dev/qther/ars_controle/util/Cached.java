@@ -47,6 +47,11 @@ public class Cached {
     public static final Cache<UUID, Entity> ENTITIES_BY_UUID = CacheBuilder.newBuilder().weakValues()
             .expireAfterAccess(Duration.ofMinutes(10)).initialCapacity(8).build();
 
+    public static @Nullable Entity getEntityByUUID(@NotNull UUID uuid) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        return server != null ? getEntityByUUID(server.getAllLevels(), uuid) : null;
+    }
+
     public static @Nullable Entity getEntityByUUID(@NotNull Iterable<ServerLevel> levels, @NotNull UUID uuid) {
         var cached = ENTITIES_BY_UUID.getIfPresent(uuid);
         if (cached != null && cached.isAlive()) {

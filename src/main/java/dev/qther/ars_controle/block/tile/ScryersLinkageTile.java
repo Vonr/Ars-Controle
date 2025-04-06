@@ -1,6 +1,7 @@
 package dev.qther.ars_controle.block.tile;
 
 import com.hollingsworth.arsnouveau.api.item.IWandable;
+import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.datagen.BlockTagProvider;
@@ -28,8 +29,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.List;
 
-public class ScryersLinkageTile extends ModdedTile implements IWandable, Container {
+public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimensionalHighlighter, Container {
     public ScryersLinkageTile(BlockPos pos, BlockState state) {
         super(ACRegistry.Tiles.SCRYERS_LINKAGE.get(), pos, state);
     }
@@ -201,6 +203,24 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, Contain
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
             }
         }
+    }
+
+    @Override
+    public List<ColorPos> getWandHighlight(List<ColorPos> list) {
+        var target = this.getTargetBlock();
+        if (target != null) {
+            list.add(ColorPos.centered(target));
+        }
+        return list;
+    }
+
+    @Override
+    public List<ColorPos> getWandHighlight(Level level, List<ColorPos> list) {
+        var target = this.getTargetInfo();
+        if (target != null && target.first() == level) {
+            list.add(ColorPos.centered(target.second()));
+        }
+        return list;
     }
 
     public static final TicketType<ChunkPos> TICKET_TYPE = TicketType.create("scryers_linkage", Comparator.comparingLong(ChunkPos::toLong), 1);

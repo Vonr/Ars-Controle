@@ -13,6 +13,7 @@ import com.hollingsworth.arsnouveau.common.network.Networking;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.qther.ars_controle.block.tile.IDimensionalHighlighter;
 import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteLockMode;
 import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteSelectionMode;
 import dev.qther.ars_controle.registry.ACRegistry;
@@ -115,14 +116,9 @@ public class RemoteItem extends ModItem implements IRadialProvider {
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
                 if (data.multiple) {
-                    if (data.firstCorner.isEmpty()) {
+                    if (data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension())) {
                         data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
                         return InteractionResult.SUCCESS;
-                    }
-
-                    if (!data.firstCorner.get().dimension().equals(level.dimension())) {
-                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
-                        return InteractionResult.FAIL;
                     }
 
                     for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
@@ -145,17 +141,12 @@ public class RemoteItem extends ModItem implements IRadialProvider {
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
-            var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
+            var targetEntity = Cached.getEntityByUUID(data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 if (data.multiple) {
-                    if (data.firstCorner.isEmpty()) {
+                    if (data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension())) {
                         data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
                         return InteractionResult.SUCCESS;
-                    }
-
-                    if (!data.firstCorner.get().dimension().equals(level.dimension())) {
-                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
-                        return InteractionResult.FAIL;
                     }
 
                     for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
@@ -229,7 +220,7 @@ public class RemoteItem extends ModItem implements IRadialProvider {
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
-            var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
+            var targetEntity = Cached.getEntityByUUID(data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 if (data.lockedFirst) {
                     wandable.onLastConnection(null, null, entity, player);
@@ -304,20 +295,30 @@ public class RemoteItem extends ModItem implements IRadialProvider {
     @Override
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level pLevel, @NotNull Entity pEntity, int pSlotId, boolean pIsSelected) {
         super.inventoryTick(stack, pLevel, pEntity, pSlotId, pIsSelected);
-        if (!pIsSelected || pLevel.isClientSide || pLevel.getGameTime() % 5 != 0) {
+        if (!pIsSelected || pLevel.isClientSide || pLevel.getGameTime() % 5 != 0 || !(pEntity instanceof ServerPlayer player)) {
             return;
         }
         var data = RemoteData.fromItemStack(stack);
 
+        Object highlighter = null;
+
         if (data.block.isPresent()) {
-            if (pLevel.getBlockEntity(data.block.get().pos()) instanceof IWandable wandable) {
-                Networking.sendToPlayerClient(new HighlightAreaPacket(wandable.getWandHighlight(new ArrayList<>()), 10), (ServerPlayer) pEntity);
+            var level = Cached.getLevelByKey(data.block.get().dimension());
+            if (level != null) {
+                highlighter = level.getBlockEntity(data.block.get().pos());
             }
-            return;
+        } else if (data.entity.isPresent()) {
+            if (player.getServer() != null) {
+                highlighter = Cached.getEntityByUUID(data.entity.get());
+            }
         }
 
-        if (data.entity.isPresent() && Cached.getEntityByUUID(pLevel.getServer().getAllLevels(), data.entity.get()) instanceof IWandable wandable) {
-            Networking.sendToPlayerClient(new HighlightAreaPacket(wandable.getWandHighlight(new ArrayList<>()), 10), (ServerPlayer) pEntity);
+        if (highlighter != null) {
+            if (highlighter instanceof IDimensionalHighlighter dim) {
+                Networking.sendToPlayerClient(new HighlightAreaPacket(dim.getWandHighlight(pLevel, new ArrayList<>()), 10), player);
+            } else if (highlighter instanceof IWandable wandable) {
+                Networking.sendToPlayerClient(new HighlightAreaPacket(wandable.getWandHighlight(new ArrayList<>()), 10), player);
+            }
         }
     }
 
