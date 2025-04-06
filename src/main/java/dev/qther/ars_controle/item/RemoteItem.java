@@ -8,16 +8,15 @@ import com.hollingsworth.arsnouveau.client.gui.radial_menu.RadialMenu;
 import com.hollingsworth.arsnouveau.client.gui.radial_menu.RadialMenuSlot;
 import com.hollingsworth.arsnouveau.client.gui.utils.RenderUtils;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
+import com.hollingsworth.arsnouveau.common.network.HighlightAreaPacket;
 import com.hollingsworth.arsnouveau.common.network.Networking;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteLockMode;
 import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteSelectionMode;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.util.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -28,6 +27,7 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -37,23 +37,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@EventBusSubscriber(modid = ArsControle.MODID)
 public class RemoteItem extends ModItem implements IRadialProvider {
     public RemoteItem() {
         super(new Properties().stacksTo(1));
@@ -277,7 +271,13 @@ public class RemoteItem extends ModItem implements IRadialProvider {
             );
         }
 
-        Minecraft.getInstance().setScreen(new GuiRadialMenu<>(menu));
+        Client.setScreen(menu);
+    }
+
+    private static class Client {
+        public static void setScreen(RadialMenu<String> menu) {
+            Minecraft.getInstance().setScreen(new GuiRadialMenu<>(menu));
+        }
     }
 
     public enum LockModeSlot {
@@ -298,6 +298,26 @@ public class RemoteItem extends ModItem implements IRadialProvider {
 
         public RadialMenuSlot<String> asSlot() {
             return new RadialMenuSlot<>(this.translatable().getString(), this.key);
+        }
+    }
+
+    @Override
+    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level pLevel, @NotNull Entity pEntity, int pSlotId, boolean pIsSelected) {
+        super.inventoryTick(stack, pLevel, pEntity, pSlotId, pIsSelected);
+        if (!pIsSelected || pLevel.isClientSide || pLevel.getGameTime() % 5 != 0) {
+            return;
+        }
+        var data = RemoteData.fromItemStack(stack);
+
+        if (data.block.isPresent()) {
+            if (pLevel.getBlockEntity(data.block.get().pos()) instanceof IWandable wandable) {
+                Networking.sendToPlayerClient(new HighlightAreaPacket(wandable.getWandHighlight(new ArrayList<>()), 10), (ServerPlayer) pEntity);
+            }
+            return;
+        }
+
+        if (data.entity.isPresent() && Cached.getEntityByUUID(pLevel.getServer().getAllLevels(), data.entity.get()) instanceof IWandable wandable) {
+            Networking.sendToPlayerClient(new HighlightAreaPacket(wandable.getWandHighlight(new ArrayList<>()), 10), (ServerPlayer) pEntity);
         }
     }
 
@@ -392,36 +412,5 @@ public class RemoteItem extends ModItem implements IRadialProvider {
         public RemoteData write(@NotNull ItemStack stack) {
             return stack.set(ACRegistry.Components.REMOTE, this);
         }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onRender(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-            return;
-        }
-
-        var mc = Minecraft.getInstance();
-        var level = Minecraft.getInstance().level;
-        var player = Minecraft.getInstance().player;
-        if (level == null || player == null) {
-            return;
-        }
-
-        var remote = player.getMainHandItem();
-        if (!remote.is(ACRegistry.Items.REMOTE.get())) {
-            return;
-        }
-
-        var data = RemoteData.fromItemStack(remote);
-
-        if (data.block.isPresent() && data.block.get().dimension().equals(level.dimension())) {
-            RenderUtil.renderBlockOutline(event, data.block.get().pos());
-        }
-
-        if (!data.multiple || data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension()) || !(mc.hitResult instanceof BlockHitResult bhr && bhr.getType() != HitResult.Type.MISS)) {
-            return;
-        }
-
-        RenderUtil.renderAABBOutline(event, AABB.encapsulatingFullBlocks(data.firstCorner.get().pos(), bhr.getBlockPos()));
     }
 }
