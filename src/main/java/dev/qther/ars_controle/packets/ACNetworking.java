@@ -5,6 +5,8 @@ import com.hollingsworth.arsnouveau.common.network.Networking;
 import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
 import dev.qther.ars_controle.packets.serverbound.PacketClearRemote;
+import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteLockMode;
+import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteSelectionMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -27,6 +29,8 @@ public class ACNetworking {
         final PayloadRegistrar reg = event.registrar("1");
 
         reg.playToServer(PacketClearRemote.TYPE, PacketClearRemote.CODEC, ACNetworking::handle);
+        reg.playToServer(PacketSetRemoteLockMode.TYPE, PacketSetRemoteLockMode.CODEC, ACNetworking::handle);
+        reg.playToServer(PacketSetRemoteSelectionMode.TYPE, PacketSetRemoteSelectionMode.CODEC, ACNetworking::handle);
 
         reg.playToClient(PacketSyncAssociation.TYPE, PacketSyncAssociation.CODEC, ACNetworking::handle);
         reg.playToClient(PacketRenderBlockOutline.TYPE, PacketRenderBlockOutline.CODEC, ACNetworking::handle);

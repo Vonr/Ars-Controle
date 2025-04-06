@@ -1,17 +1,31 @@
 package dev.qther.ars_controle.item;
 
+import com.hollingsworth.arsnouveau.api.item.IRadialProvider;
 import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.api.util.ANEventBus;
+import com.hollingsworth.arsnouveau.client.gui.radial_menu.GuiRadialMenu;
+import com.hollingsworth.arsnouveau.client.gui.radial_menu.RadialMenu;
+import com.hollingsworth.arsnouveau.client.gui.radial_menu.RadialMenuSlot;
+import com.hollingsworth.arsnouveau.client.gui.utils.RenderUtils;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
+import com.hollingsworth.arsnouveau.common.network.Networking;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.qther.ars_controle.ArsControle;
+import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteLockMode;
+import dev.qther.ars_controle.packets.serverbound.PacketSetRemoteSelectionMode;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
+import dev.qther.ars_controle.util.RenderUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.InteractionHand;
@@ -19,16 +33,28 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class RemoteItem extends ModItem {
+@EventBusSubscriber(modid = ArsControle.MODID)
+public class RemoteItem extends ModItem implements IRadialProvider {
     public RemoteItem() {
         super(new Properties().stacksTo(1));
     }
@@ -36,8 +62,8 @@ public class RemoteItem extends ModItem {
     @Override
     public @NotNull Component getName(ItemStack stack) {
         var data = stack.get(ACRegistry.Components.REMOTE);
-        if (data != null && !data.targetName.isEmpty()) {
-            return Component.translatable("item.ars_controle.remote.with_target", Component.translatable(data.targetName));
+        if (data != null && data.targetName.getContents() != PlainTextContents.EMPTY) {
+            return Component.translatable("item.ars_controle.remote.with_target", data.targetName);
         }
         return Component.translatable("item.ars_controle.remote");
     }
@@ -67,7 +93,7 @@ public class RemoteItem extends ModItem {
         if (data.isEmpty()) {
             if (player.isShiftKeyDown()) {
                 if (level.getBlockEntity(blockPos) instanceof IWandable) {
-                    RemoteData.fromBlock(block, GlobalPos.of(level.dimension(), blockPos)).write(stack);
+                    RemoteData.fromBlock(block, GlobalPos.of(level.dimension(), blockPos), data.lockedFirst, data.multiple, data.firstCorner.orElse(null)).write(stack);
                     PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
 
                     return InteractionResult.SUCCESS;
@@ -94,13 +120,67 @@ public class RemoteItem extends ModItem {
 
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onLastConnection(new GlobalPos(level.dimension(), blockPos), null, null, player);
+                if (data.multiple) {
+                    if (data.firstCorner.isEmpty()) {
+                        data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
+                        return InteractionResult.SUCCESS;
+                    }
+
+                    if (!data.firstCorner.get().dimension().equals(level.dimension())) {
+                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
+                        return InteractionResult.FAIL;
+                    }
+
+                    for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
+                        if (data.lockedFirst) {
+                            wandable.onFirstConnection(new GlobalPos(level.dimension(), pos), ctx.getClickedFace(), null, player);
+                        } else {
+                            wandable.onLastConnection(new GlobalPos(level.dimension(), pos), ctx.getClickedFace(), null, player);
+                        }
+                    }
+
+                    data.withFirstCorner(null).write(stack);
+                } else {
+                    if (data.lockedFirst) {
+                        wandable.onFirstConnection(new GlobalPos(level.dimension(), blockPos), ctx.getClickedFace(), null, player);
+                    } else {
+                        wandable.onLastConnection(new GlobalPos(level.dimension(), blockPos), ctx.getClickedFace(), null, player);
+                    }
+                }
+
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onFirstConnection(new GlobalPos(level.dimension(), blockPos), null, null, player);
+                if (data.multiple) {
+                    if (data.firstCorner.isEmpty()) {
+                        data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
+                        return InteractionResult.SUCCESS;
+                    }
+
+                    if (!data.firstCorner.get().dimension().equals(level.dimension())) {
+                        PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_dimension"));
+                        return InteractionResult.FAIL;
+                    }
+
+                    for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
+                        if (data.lockedFirst) {
+                            wandable.onFirstConnection(new GlobalPos(level.dimension(), pos), ctx.getClickedFace(), null, player);
+                        } else {
+                            wandable.onLastConnection(new GlobalPos(level.dimension(), pos), ctx.getClickedFace(), null, player);
+                        }
+                    }
+
+                    data.withFirstCorner(null).write(stack);
+                } else {
+                    if (data.lockedFirst) {
+                        wandable.onFirstConnection(new GlobalPos(level.dimension(), blockPos), ctx.getClickedFace(), null, player);
+                    } else {
+                        wandable.onLastConnection(new GlobalPos(level.dimension(), blockPos), ctx.getClickedFace(), null, player);
+                    }
+                }
+
                 return InteractionResult.CONSUME;
             }
         }
@@ -120,8 +200,8 @@ public class RemoteItem extends ModItem {
         if (data.isEmpty()) {
             if (player.isShiftKeyDown()) {
                 if (entity.isAlive() && entity instanceof IWandable) {
-                    RemoteData.fromEntity(entity).write(stack);
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", entity.getDisplayName(), level.dimension().location().toString()));
+                    RemoteData.fromEntity(entity, data.lockedFirst, data.multiple, data.firstCorner.orElse(null)).write(stack);
+                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", entity.getName(), level.dimension().location().toString()));
 
                     return InteractionResult.CONSUME;
                 }
@@ -146,14 +226,22 @@ public class RemoteItem extends ModItem {
 
             var tile = targetLevel.getBlockEntity(targetPos);
             if (tile instanceof IWandable wandable) {
-                wandable.onLastConnection(null, null, entity, player);
+                if (data.lockedFirst) {
+                    wandable.onLastConnection(null, null, entity, player);
+                } else {
+                    wandable.onFirstConnection(null, null, entity, player);
+                }
                 return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(server.getAllLevels(), data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
-                wandable.onLastConnection(null, null, entity, player);
+                if (data.lockedFirst) {
+                    wandable.onLastConnection(null, null, entity, player);
+                } else {
+                    wandable.onFirstConnection(null, null, entity, player);
+                }
                 return InteractionResult.CONSUME;
             }
         }
@@ -161,35 +249,140 @@ public class RemoteItem extends ModItem {
         return InteractionResult.PASS;
     }
 
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context, @NotNull List<Component> tooltip2, @NotNull TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip2, flagIn);
+        var data = RemoteData.fromItemStack(stack);
+        tooltip2.add(Component.translatable("ars_controle.remote.lock_mode.tooltip", data.lockedFirst ? Component.translatable("ars_controle.remote.lock_mode.first") : Component.translatable("ars_controle.remote.lock_mode.last")));
+        tooltip2.add(Component.translatable("ars_controle.remote.selection_mode.tooltip", data.multiple ? Component.translatable("ars_controle.remote.selection_mode.multiple") : Component.translatable("ars_controle.remote.selection_mode.single")));
+    }
+
+    @Override
+    public void onRadialKeyPressed(ItemStack stack, Player player) {
+        RadialMenu<String> menu;
+
+        if (player.isShiftKeyDown()) {
+            menu = new RadialMenu<>(
+                    slot -> Networking.sendToServer(new PacketSetRemoteLockMode(LockModeSlot.VALUES[slot])),
+                    List.of(LockModeSlot.LOCKED_FIRST.asSlot(), LockModeSlot.LOCKED_LAST.asSlot()),
+                    RenderUtils::drawString,
+                    0
+            );
+        } else {
+            menu = new RadialMenu<>(
+                    slot -> Networking.sendToServer(new PacketSetRemoteSelectionMode(SelectionModeSlot.VALUES[slot])),
+                    List.of(SelectionModeSlot.SINGLE.asSlot(), SelectionModeSlot.MULTIPLE.asSlot()),
+                    RenderUtils::drawString,
+                    0
+            );
+        }
+
+        Minecraft.getInstance().setScreen(new GuiRadialMenu<>(menu));
+    }
+
+    public enum LockModeSlot {
+        LOCKED_FIRST("ars_controle.remote.lock_mode.first"),
+        LOCKED_LAST("ars_controle.remote.lock_mode.last");
+
+        public static final LockModeSlot[] VALUES = values();
+
+        public final String key;
+
+        LockModeSlot(String key) {
+            this.key = key;
+        }
+
+        public Component translatable() {
+            return Component.translatable("ars_controle.remote.lock_mode.radial", Component.translatable(key));
+        }
+
+        public RadialMenuSlot<String> asSlot() {
+            return new RadialMenuSlot<>(this.translatable().getString(), this.key);
+        }
+    }
+
+    public enum SelectionModeSlot {
+        SINGLE("ars_controle.remote.selection_mode.single"),
+        MULTIPLE("ars_controle.remote.selection_mode.multiple");
+
+        public static final SelectionModeSlot[] VALUES = values();
+
+        public final String key;
+
+        SelectionModeSlot(String key) {
+            this.key = key;
+        }
+
+        public Component translatable() {
+            return Component.translatable(key);
+        }
+
+        public RadialMenuSlot<String> asSlot() {
+            return new RadialMenuSlot<>(this.translatable().getString(), this.key);
+        }
+    }
+
     public record RemoteData(@NotNull Optional<GlobalPos> block, @NotNull Optional<UUID> entity,
-                             @NotNull String targetName) {
+                             boolean lockedFirst,
+                             boolean multiple, @NotNull Optional<GlobalPos> firstCorner,
+                             @NotNull Component targetName) {
         public static final Codec<RemoteData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 GlobalPos.CODEC.optionalFieldOf("block").forGetter(RemoteData::block),
                 UUIDUtil.CODEC.optionalFieldOf("entity").forGetter(RemoteData::entity),
-                Codec.STRING.fieldOf("target_name").forGetter(RemoteData::targetName)
+                Codec.BOOL.fieldOf("locked_first").forGetter(RemoteData::lockedFirst),
+                Codec.BOOL.fieldOf("multiple").forGetter(RemoteData::multiple),
+                GlobalPos.CODEC.optionalFieldOf("first_corner").forGetter(RemoteData::firstCorner),
+                ComponentSerialization.CODEC.fieldOf("target_name").forGetter(RemoteData::targetName)
         ).apply(instance, RemoteData::new));
 
-        public static final StreamCodec<FriendlyByteBuf, RemoteData> STREAM_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, RemoteData> STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.optional(GlobalPos.STREAM_CODEC), RemoteData::block,
                 ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC), RemoteData::entity,
-                ByteBufCodecs.STRING_UTF8, RemoteData::targetName,
+                ByteBufCodecs.BOOL, RemoteData::lockedFirst,
+                ByteBufCodecs.BOOL, RemoteData::multiple,
+                ByteBufCodecs.optional(GlobalPos.STREAM_CODEC), RemoteData::firstCorner,
+                ComponentSerialization.STREAM_CODEC, RemoteData::targetName,
                 RemoteData::new
         );
 
         public static RemoteData empty() {
-            return new RemoteData(Optional.empty(), Optional.empty(), "");
+            return new RemoteData(Optional.empty(), Optional.empty(), true, false, Optional.empty(), Component.empty());
         }
 
         public static RemoteData fromItemStack(@NotNull ItemStack stack) {
-            return stack.getOrDefault(ACRegistry.Components.REMOTE.get(), RemoteData.empty());
+            return stack.getOrDefault(ACRegistry.Components.REMOTE, RemoteData.empty());
         }
 
-        public static RemoteData fromBlock(@NotNull Block block, @NotNull GlobalPos pos) {
-            return new RemoteData(Optional.of(pos), Optional.empty(), block.getDescriptionId());
+        public static RemoteData fromBlock(@NotNull Block block, @NotNull GlobalPos pos, boolean lockedFirst, boolean multiple, @Nullable GlobalPos firstCorner) {
+            return new RemoteData(Optional.of(pos), Optional.empty(), lockedFirst, multiple, Optional.ofNullable(firstCorner), block.getName());
         }
 
-        public static RemoteData fromEntity(@NotNull Entity entity) {
-            return new RemoteData(Optional.empty(), Optional.of(entity.getUUID()), entity.getType().getDescriptionId());
+        public static RemoteData fromEntity(@NotNull Entity entity, boolean lockedFirst, boolean multiple, @Nullable GlobalPos firstCorner) {
+            return new RemoteData(Optional.empty(), Optional.of(entity.getUUID()), lockedFirst, multiple, Optional.ofNullable(firstCorner), entity.getName());
+        }
+
+        public RemoteData withBlock(@Nullable GlobalPos pos) {
+            return new RemoteData(Optional.ofNullable(pos), this.entity, this.lockedFirst, this.multiple, this.firstCorner, this.targetName);
+        }
+
+        public RemoteData withEntity(@Nullable Entity entity) {
+            return new RemoteData(this.block, Optional.ofNullable(entity).map(Entity::getUUID), this.lockedFirst, this.multiple, this.firstCorner, this.targetName);
+        }
+
+        public RemoteData withLockingMode(LockModeSlot slot) {
+            return new RemoteData(this.block, this.entity, slot == LockModeSlot.LOCKED_FIRST, this.multiple, this.firstCorner, this.targetName);
+        }
+
+        public RemoteData withSelectionMode(SelectionModeSlot slot) {
+            return new RemoteData(this.block, this.entity, this.lockedFirst, slot == SelectionModeSlot.MULTIPLE, this.firstCorner, this.targetName);
+        }
+
+        public RemoteData withFirstCorner(@Nullable GlobalPos corner) {
+            return new RemoteData(this.block, this.entity, this.lockedFirst, this.multiple, Optional.ofNullable(corner), this.targetName);
+        }
+
+        public RemoteData cleared() {
+            return new RemoteData(Optional.empty(), Optional.empty(), this.lockedFirst, this.multiple, Optional.empty(), Component.empty());
         }
 
         public boolean isEmpty() {
@@ -199,5 +392,36 @@ public class RemoteItem extends ModItem {
         public RemoteData write(@NotNull ItemStack stack) {
             return stack.set(ACRegistry.Components.REMOTE, this);
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onRender(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+            return;
+        }
+
+        var mc = Minecraft.getInstance();
+        var level = Minecraft.getInstance().level;
+        var player = Minecraft.getInstance().player;
+        if (level == null || player == null) {
+            return;
+        }
+
+        var remote = player.getMainHandItem();
+        if (!remote.is(ACRegistry.Items.REMOTE.get())) {
+            return;
+        }
+
+        var data = RemoteData.fromItemStack(remote);
+
+        if (data.block.isPresent() && data.block.get().dimension().equals(level.dimension())) {
+            RenderUtil.renderBlockOutline(event, data.block.get().pos());
+        }
+
+        if (!data.multiple || data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension()) || !(mc.hitResult instanceof BlockHitResult bhr && bhr.getType() != HitResult.Type.MISS)) {
+            return;
+        }
+
+        RenderUtil.renderAABBOutline(event, AABB.encapsulatingFullBlocks(data.firstCorner.get().pos(), bhr.getBlockPos()));
     }
 }

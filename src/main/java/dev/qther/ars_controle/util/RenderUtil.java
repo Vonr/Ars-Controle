@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -60,6 +61,30 @@ public class RenderUtil {
         var builder = buffer.getBuffer(BLOCK_OUTLINE);
 
         var color = ParticleColor.defaultParticleColor();
+        LevelRendererInvoker.invokeRenderShape(poseStack, builder, shape, 0, 0, 0, color.getRed(), color.getGreen(), color.getBlue(), 1.0F);
+        poseStack.popPose();
+    }
+
+    public static void renderAABBOutline(RenderLevelStageEvent event, AABB aabb) {
+        var mc = Minecraft.getInstance();
+        var level = mc.level;
+        if (level == null) {
+            return;
+        }
+
+        VoxelShape shape = Shapes.box(0, 0, 0, aabb.getXsize(), aabb.getYsize(), aabb.getZsize());
+
+        Vec3 projectedView = mc.gameRenderer.getMainCamera().getPosition();
+
+        var poseStack = event.getPoseStack();
+        poseStack.pushPose();
+        poseStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
+        poseStack.translate(aabb.minX, aabb.minY, aabb.minZ);
+
+        OutlineBufferSource buffer = mc.renderBuffers().outlineBufferSource();
+        var builder = buffer.getBuffer(BLOCK_OUTLINE);
+
+        var color = new ParticleColor(22, 216, 50);
         LevelRendererInvoker.invokeRenderShape(poseStack, builder, shape, 0, 0, 0, color.getRed(), color.getGreen(), color.getBlue(), 1.0F);
         poseStack.popPose();
     }

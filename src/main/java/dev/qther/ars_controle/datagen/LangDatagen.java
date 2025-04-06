@@ -61,6 +61,17 @@ public class LangDatagen extends LanguageProvider {
 
         add("ars_controle.remote.set_target", "Set remote target to %s in %s.");
 
+        add("ars_controle.remote.lock_mode.first", "First");
+        add("ars_controle.remote.lock_mode.last", "Last");
+        add("ars_controle.remote.lock_mode.tooltip", "Locking %s");
+        add("ars_controle.remote.lock_mode.radial", "Lock %s");
+        add("ars_controle.remote.lock_mode.set", "Set locking mode to %s.");
+
+        add("ars_controle.remote.selection_mode.single", "Single");
+        add("ars_controle.remote.selection_mode.multiple", "Multiple");
+        add("ars_controle.remote.selection_mode.tooltip", "%s Selection");
+        add("ars_controle.remote.selection_mode.set", "Set selection mode to %s.");
+
         add("ars_controle.page1.warping_spell_prism", "The Warping Spell Prism allows you to warp a spell projectile to anywhere in the world, even across dimensions!");
         add("ars_controle.page1.scryers_linkage", "The Scryer's Linkage links to another block, allowing machines to interact with its linked block from distance places. It is capable of linking items, liquids, energy, redstone, and a few other things. To configure it, use a Dominion Wand first on the block you want to link to, then on the linkage.");
         add("ars_controle.page1.temporal_stability_sensor", "The Temporal Stability Sensor shows how unstable the time of the world is. Using a comparator, you can find out how close the world is to lagging, with higher redstone output meaning the world is closer to lagging. You can use this to turn off farms automatically to prevent the server from lagging.");
