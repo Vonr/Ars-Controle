@@ -34,14 +34,17 @@ You can use this to turn off farms automatically to prevent the server from lagg
 
 #### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
 
-The Remote is an item that lets you remotely configure blocks such as the Warping Spell Prism and Storage Lectern.
+The Remote lets you remotely configure blocks and entities that the Dominion Wand can.
 
-To use it, first use it on the block you would like to configure.
-Then, you can use it again on other blocks or entities depending on what the block you are configuring accepts.  
-To clear its configuration target, left click on air while holding the remote.
+It has two radial menus, one for configuring which end of the connection is locked (first or second) accessible when holding Shift,
+and another for the mode of selection (single or multiple) accessible when not holding Shift.
 
-The remote will allow for cross dimensional configuration of the Warping Spell Prism, unlike the Dominion Wand
-which does not store dimensions. (Dominion wands can now configure cross-dimensionally in Ars Nouveau 5.3.2 and higher)
+To use it, first crouch and use it on the thing you would like to configure.
+Then, you can use it again on other blocks or entities depending on what the thing you are configuring accepts.
+
+For example, selecting a Storage Lectern with Locking Last allows you to link inventories with ease.
+Selecting a Starbuncle with Locking First would let you select many inventories to deposit items to.
+When you are finished, left clicking air will clear the Remote's target.
 
 #### Portable Brazier Relay
 
