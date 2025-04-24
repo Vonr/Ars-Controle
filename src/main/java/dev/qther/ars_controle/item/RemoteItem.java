@@ -87,21 +87,16 @@ public class RemoteItem extends ModItem implements IRadialProvider {
         var data = RemoteData.fromItemStack(stack);
         if (data.isEmpty()) {
             if (player.isShiftKeyDown()) {
-                if (level.getBlockEntity(blockPos) instanceof IWandable) {
-                    RemoteData.fromBlock(block, GlobalPos.of(level.dimension(), blockPos), data.lockedFirst, data.multiple, data.firstCorner.orElse(null)).write(stack);
-                    PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
+                RemoteData.fromBlock(block, GlobalPos.of(level.dimension(), blockPos), data.lockedFirst, data.multiple, data.firstCorner.orElse(null)).write(stack);
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", blockPos.toShortString(), level.dimension().location().toString()));
 
-                    return InteractionResult.SUCCESS;
-                }
-
-                return InteractionResult.PASS;
+                return InteractionResult.SUCCESS;
             }
 
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.get.none"));
             return InteractionResult.FAIL;
         }
 
-        var server = level.getServer();
         if (data.block.isPresent()) {
             var globalPos = data.block.get();
             var targetPos = globalPos.pos();
@@ -139,6 +134,35 @@ public class RemoteItem extends ModItem implements IRadialProvider {
                 }
 
                 return InteractionResult.CONSUME;
+            } else {
+                if (data.multiple) {
+                    if (data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension())) {
+                        data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
+                        return InteractionResult.SUCCESS;
+                    }
+
+                    for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
+                        if (level.getBlockEntity(pos) instanceof IWandable wandable) {
+                            if (data.lockedFirst) {
+                                wandable.onLastConnection(globalPos, ctx.getClickedFace(), null, player);
+                            } else {
+                                wandable.onFirstConnection(globalPos, ctx.getClickedFace(), null, player);
+                            }
+                        }
+                    }
+
+                    data.withFirstCorner(null).write(stack);
+                } else {
+                    if (level.getBlockEntity(blockPos) instanceof IWandable wandable) {
+                        if (data.lockedFirst) {
+                            wandable.onLastConnection(globalPos, ctx.getClickedFace(), null, player);
+                        } else {
+                            wandable.onFirstConnection(globalPos, ctx.getClickedFace(), null, player);
+                        }
+                    }
+                }
+
+                return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
             var targetEntity = Cached.getEntityByUUID(data.entity.get());
@@ -167,6 +191,35 @@ public class RemoteItem extends ModItem implements IRadialProvider {
                 }
 
                 return InteractionResult.CONSUME;
+            } else if (targetEntity instanceof LivingEntity le) {
+                if (data.multiple) {
+                    if (data.firstCorner.isEmpty() || !data.firstCorner.get().dimension().equals(level.dimension())) {
+                        data.withFirstCorner(new GlobalPos(level.dimension(), blockPos)).write(stack);
+                        return InteractionResult.SUCCESS;
+                    }
+
+                    for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
+                        if (level.getBlockEntity(pos) instanceof IWandable wandable) {
+                            if (data.lockedFirst) {
+                                wandable.onLastConnection(null, ctx.getClickedFace(), le, player);
+                            } else {
+                                wandable.onFirstConnection(null, ctx.getClickedFace(), le, player);
+                            }
+                        }
+                    }
+
+                    data.withFirstCorner(null).write(stack);
+                } else {
+                    if (level.getBlockEntity(blockPos) instanceof IWandable wandable) {
+                        if (data.lockedFirst) {
+                            wandable.onLastConnection(null, ctx.getClickedFace(), le, player);
+                        } else {
+                            wandable.onFirstConnection(null, ctx.getClickedFace(), le, player);
+                        }
+                    }
+                }
+
+                return InteractionResult.CONSUME;
             }
         }
 
@@ -184,7 +237,7 @@ public class RemoteItem extends ModItem implements IRadialProvider {
         var data = RemoteData.fromItemStack(stack);
         if (data.isEmpty()) {
             if (player.isShiftKeyDown()) {
-                if (entity.isAlive() && entity instanceof IWandable) {
+                if (entity.isAlive()) {
                     RemoteData.fromEntity(entity, data.lockedFirst, data.multiple, data.firstCorner.orElse(null)).write(stack);
                     PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.set_target", entity.getName(), level.dimension().location().toString()));
 
@@ -217,15 +270,28 @@ public class RemoteItem extends ModItem implements IRadialProvider {
                     wandable.onFirstConnection(null, null, entity, player);
                 }
                 return InteractionResult.CONSUME;
+            } else if (entity instanceof IWandable wandable) {
+                if (data.lockedFirst) {
+                    wandable.onFirstConnection(globalPos, null, null, player);
+                } else {
+                    wandable.onLastConnection(globalPos, null, null, player);
+                }
+                return InteractionResult.CONSUME;
             }
         } else if (data.entity.isPresent()) {
-            var server = level.getServer();
             var targetEntity = Cached.getEntityByUUID(data.entity.get());
             if (targetEntity instanceof IWandable wandable) {
                 if (data.lockedFirst) {
                     wandable.onLastConnection(null, null, entity, player);
                 } else {
                     wandable.onFirstConnection(null, null, entity, player);
+                }
+                return InteractionResult.CONSUME;
+            } else if (targetEntity instanceof LivingEntity le && entity instanceof IWandable wandable) {
+                if (data.lockedFirst) {
+                    wandable.onFirstConnection(null, null, le, player);
+                } else {
+                    wandable.onLastConnection(null, null, le, player);
                 }
                 return InteractionResult.CONSUME;
             }
