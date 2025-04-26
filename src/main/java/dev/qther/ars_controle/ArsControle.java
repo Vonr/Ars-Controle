@@ -1,5 +1,6 @@
 package dev.qther.ars_controle;
 
+import dev.qther.ars_controle.block.tile.ScrollHolderTile;
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
 import dev.qther.ars_controle.config.ServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
@@ -14,6 +15,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -43,6 +45,8 @@ public class ArsControle {
     }
 
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ACRegistry.Tiles.SCROLL_HOLDER.get(), (tile, context) -> new ScrollHolderTile.ItemHandler(tile));
+
         if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
             ArsControleCCCompat.register(event);
         }
