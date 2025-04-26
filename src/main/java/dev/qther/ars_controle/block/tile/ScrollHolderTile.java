@@ -51,7 +51,8 @@ public class ScrollHolderTile extends SingleItemTile {
 
         level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), 2);
 
-        nextOrder: for (Direction[] order : ORDERINGS) {
+        nextOrder:
+        for (Direction[] order : ORDERINGS) {
             var cursor = this.getBlockPos().mutable();
             var vertices = new BlockPos[6];
             vertices[0] = this.getBlockPos();
@@ -59,23 +60,9 @@ public class ScrollHolderTile extends SingleItemTile {
 
             for (int i = 0; i < order.length; ++i) {
                 var direction = order[i];
-                direction = switch (facing) {
-                    case DOWN -> direction.getOpposite();
-                    case UP -> direction;
-                    case SOUTH -> direction.getClockWise(Direction.Axis.X);
-                    case NORTH -> direction.getCounterClockWise(Direction.Axis.X);
-                    case WEST -> direction.getClockWise(Direction.Axis.Z);
-                    case EAST -> direction.getCounterClockWise(Direction.Axis.Z);
-                };
+                direction = getRotatedDirection(facing, direction);
                 var inside = order[i == order.length - 1 ? 1 : i + 1];
-                inside = switch (facing) {
-                    case DOWN -> inside.getOpposite();
-                    case UP -> inside;
-                    case SOUTH -> inside.getClockWise(Direction.Axis.X);
-                    case NORTH -> inside.getCounterClockWise(Direction.Axis.X);
-                    case WEST -> inside.getClockWise(Direction.Axis.Z);
-                    case EAST -> inside.getCounterClockWise(Direction.Axis.Z);
-                };
+                inside = getRotatedDirection(facing, inside);
 
                 var distance = 0;
 
@@ -203,9 +190,21 @@ public class ScrollHolderTile extends SingleItemTile {
                         level.removeBlock(pos, false);
                     }
                 }
+
                 break;
             }
         }
+    }
+
+    private Direction getRotatedDirection(Direction facing, Direction direction) {
+        return switch (facing) {
+            case DOWN -> direction.getOpposite();
+            case UP -> direction;
+            case SOUTH -> direction.getClockWise(Direction.Axis.X);
+            case NORTH -> direction.getCounterClockWise(Direction.Axis.X);
+            case WEST -> direction.getClockWise(Direction.Axis.Z);
+            case EAST -> direction.getCounterClockWise(Direction.Axis.Z);
+        };
     }
 
     @Override
