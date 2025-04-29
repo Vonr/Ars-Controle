@@ -42,7 +42,7 @@ public class ScrollHolderTile extends SingleItemTile {
     };
 
     public void update() {
-        if (!(level instanceof ServerLevel) || !ServerConfig.ENABLE_WARP_PORTALS.get()) {
+        if (!(level instanceof ServerLevel)) {
             return;
         }
 
@@ -50,6 +50,10 @@ public class ScrollHolderTile extends SingleItemTile {
         var facing = state.getValue(ScrollHolderBlock.FACING);
 
         level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), 2);
+
+        if (!ServerConfig.ENABLE_WARP_PORTALS.get()) {
+            return;
+        }
 
         nextOrder:
         for (Direction[] order : ORDERINGS) {
