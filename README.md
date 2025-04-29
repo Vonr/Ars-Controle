@@ -30,6 +30,13 @@ with higher redstone output meaning the world is closer to lagging.
 
 You can use this to turn off farms automatically to prevent the server from lagging.
 
+#### Warp Scroll Holder
+
+The Warp Scroll Holder allows you to easily open and close warp portals to your desired destinations. 
+
+Simply replace one of your portal frames with a Warp Scroll Holder in an appropriate direction and
+insert a Warp Scroll while having some Source within 10 blocks (Manhattan distance).
+
 ### Items
 
 #### Remote ![](https://github.com/Vonr/Ars-Controle/blob/1.21/src/main/resources/assets/ars_controle/textures/item/remote.png?raw=true)
