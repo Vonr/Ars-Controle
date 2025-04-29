@@ -11,7 +11,7 @@ import com.hollingsworth.arsnouveau.common.entity.EntityProjectileSpell;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
-import dev.qther.ars_controle.config.ServerConfig;
+import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -126,7 +126,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         var hitPos = BlockPos.containing(hit.getLocation());
         if (!dim.isLoaded(hitPos)) {
-            int loadTime = ServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
+            int loadTime = ACServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
             if (loadTime > 0) {
                 var loadPos = new ChunkPos(hitPos);
                 dim.getChunkSource().addRegionTicket(

@@ -10,6 +10,7 @@ import com.hollingsworth.arsnouveau.setup.config.ServerConfig;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.registry.DataComponentRegistry;
 import dev.qther.ars_controle.block.ScrollHolderBlock;
+import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.registry.ACRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -182,9 +183,12 @@ public class ScrollHolderTile extends SingleItemTile {
                     if (!this.stack.isEmpty() && level.getBlockState(pos).isAir()) {
                         if (needsSource) {
                             needsSource = false;
-                            var taken = SourceUtil.takeSourceMultipleWithParticles(this.getBlockPos(), level, 10, 1000);
-                            if (taken == null || taken.isEmpty()) {
-                                continue nextOrder;
+                            int source = ACServerConfig.SERVER.SCROLL_HOLDER_SOURCE_COST.get();
+                            if (source > 0) {
+                                var taken = SourceUtil.takeSourceMultipleWithParticles(this.getBlockPos(), level, 10, source);
+                                if (taken == null || taken.isEmpty()) {
+                                    continue nextOrder;
+                                }
                             }
                         }
                         level.setBlock(pos, BlockRegistry.PORTAL_BLOCK.defaultBlockState().setValue(PortalBlock.AXIS, axis), 18);

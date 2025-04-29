@@ -6,7 +6,7 @@ import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.config.ServerConfig;
+import dev.qther.ars_controle.config.ACServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -138,21 +138,21 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
         if (hitResult instanceof BlockHitResult b) {
             distSqr = b.getBlockPos().getCenter().distanceToSqr(this.getBlockPos().getCenter());
             if (this.getTargetLevel() != level) {
-                dimCost = ServerConfig.SERVER.WARPING_SPELL_PRISM_COST_DIMENSION.get();
+                dimCost = ACServerConfig.SERVER.WARPING_SPELL_PRISM_COST_DIMENSION.get();
             }
         } else if (hitResult instanceof EntityHitResult e) {
             distSqr = e.getLocation().distanceToSqr(this.getBlockPos().getCenter());
             if (this.getTargetLevel() != level) {
-                dimCost = ServerConfig.SERVER.WARPING_SPELL_PRISM_COST_DIMENSION.get();
+                dimCost = ACServerConfig.SERVER.WARPING_SPELL_PRISM_COST_DIMENSION.get();
             }
         }
 
-        var costMinDistance = ServerConfig.SERVER.WARPING_SPELL_PRISM_COST_MIN_DISTANCE.get();
+        var costMinDistance = ACServerConfig.SERVER.WARPING_SPELL_PRISM_COST_MIN_DISTANCE.get();
         var costMinDistanceSqr = costMinDistance * costMinDistance;
-        var costPerBlock = ServerConfig.SERVER.WARPING_SPELL_PRISM_COST_PER_BLOCK.get();
+        var costPerBlock = ACServerConfig.SERVER.WARPING_SPELL_PRISM_COST_PER_BLOCK.get();
 
         if (distSqr > costMinDistanceSqr) {
-            int maxCost = ServerConfig.SERVER.WARPING_SPELL_PRISM_MAX_SOURCE_COST.get();
+            int maxCost = ACServerConfig.SERVER.WARPING_SPELL_PRISM_MAX_SOURCE_COST.get();
             if (maxCost < 0) {
                 maxCost = Integer.MAX_VALUE;
             }

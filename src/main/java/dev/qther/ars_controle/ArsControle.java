@@ -2,7 +2,7 @@ package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.block.tile.ScrollHolderTile;
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
-import dev.qther.ars_controle.config.ServerConfig;
+import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.packets.ACNetworking;
@@ -37,7 +37,7 @@ public class ArsControle {
 
         NeoForge.EVENT_BUS.addListener(ArsControle::onServerStopped);
 
-        container.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+        container.registerConfig(ModConfig.Type.SERVER, ACServerConfig.SPEC);
     }
 
     public static ResourceLocation prefix(String path) {
