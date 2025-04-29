@@ -1,6 +1,6 @@
 package dev.qther.ars_controle;
 
-import dev.qther.ars_controle.config.ClientConfig;
+import dev.qther.ars_controle.config.ACClientConfig;
 import dev.qther.ars_controle.config.ConfigScreenFactory;
 import dev.qther.ars_controle.item.RemoteItem;
 import dev.qther.ars_controle.packets.ACNetworking;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 @Mod(value = ArsControle.MODID, dist = Dist.CLIENT)
 public class ArsControleClient {
     public ArsControleClient(IEventBus bus, ModContainer container) {
-        container.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+        container.registerConfig(ModConfig.Type.CLIENT, ACClientConfig.SPEC);
         container.registerExtensionPoint(IConfigScreenFactory.class, new ConfigScreenFactory());
 
         NeoForge.EVENT_BUS.register(this);

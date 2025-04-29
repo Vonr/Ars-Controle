@@ -1,5 +1,6 @@
 package dev.qther.ars_controle.datagen;
 
+import com.hollingsworth.arsnouveau.common.datagen.BlockTagProvider;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.registry.ACRegistry;
@@ -15,10 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
+public class ACBlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
     public static TagKey<Block> SCRYERS_LINKAGE_BLACKLIST = BlockTags.create(ArsControle.prefix("scryers_linkage_blacklist"));
 
-    public BlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> future, ExistingFileHelper helper) {
+    public ACBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> future, ExistingFileHelper helper) {
         super(output, Registries.BLOCK, future, block -> block.builtInRegistryHolder().key(), ArsControle.MODID, helper);
     }
 
@@ -27,12 +28,17 @@ public class BlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ACRegistry.Blocks.WARPING_SPELL_PRISM.get(),
                 ACRegistry.Blocks.SCRYERS_LINKAGE.get(),
-                ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR.get()
+                ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR.get(),
+                ACRegistry.Blocks.SCROLL_HOLDER.get()
         );
 
         this.tag(SCRYERS_LINKAGE_BLACKLIST).add(
                 BlockRegistry.CRAFTING_LECTERN.get(),
                 ACRegistry.Blocks.SCRYERS_LINKAGE.get()
+        );
+
+        this.tag(BlockTagProvider.DECORATIVE_AN).add(
+                ACRegistry.Blocks.SCROLL_HOLDER.get()
         );
     }
 

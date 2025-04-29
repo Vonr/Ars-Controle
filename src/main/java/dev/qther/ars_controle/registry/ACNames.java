@@ -5,6 +5,7 @@ import com.hollingsworth.arsnouveau.common.lib.GlyphLib;
 public class ACNames {
     public static final String WARPING_SPELL_PRISM = "warping_spell_prism";
     public static final String SCRYERS_LINKAGE = "scryers_linkage";
+    public static final String SCROLL_HOLDER = "scroll_holder";
     public static final String TEMPORAL_STABILITY_SENSOR = "temporal_stability_sensor";
     public static final String REMOTE = "remote";
     public static final String PORTABLE_BRAZIER_RELAY = "portable_brazier_relay";

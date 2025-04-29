@@ -6,9 +6,11 @@ import com.hollingsworth.arsnouveau.setup.registry.BlockEntityTypeRegistryWrappe
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistryWrapper;
 import com.hollingsworth.arsnouveau.setup.registry.ItemRegistryWrapper;
 import dev.qther.ars_controle.ArsControle;
+import dev.qther.ars_controle.block.ScrollHolderBlock;
 import dev.qther.ars_controle.block.ScryersLinkageBlock;
 import dev.qther.ars_controle.block.TemporalStabilitySensorBlock;
 import dev.qther.ars_controle.block.WarpingSpellPrismBlock;
+import dev.qther.ars_controle.block.tile.ScrollHolderTile;
 import dev.qther.ars_controle.block.tile.ScryersLinkageTile;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
@@ -76,6 +78,7 @@ public class ACRegistry {
     public static class Blocks {
         public static BlockRegistryWrapper<WarpingSpellPrismBlock> WARPING_SPELL_PRISM = new BlockRegistryWrapper<>(BLOCKS.register(ACNames.WARPING_SPELL_PRISM, (block) -> new WarpingSpellPrismBlock()));
         public static BlockRegistryWrapper<ScryersLinkageBlock> SCRYERS_LINKAGE = new BlockRegistryWrapper<>(BLOCKS.register(ACNames.SCRYERS_LINKAGE, (block) -> new ScryersLinkageBlock()));
+        public static BlockRegistryWrapper<ScrollHolderBlock> SCROLL_HOLDER = new BlockRegistryWrapper<>(BLOCKS.register(ACNames.SCROLL_HOLDER, (block) -> new ScrollHolderBlock()));
         public static BlockRegistryWrapper<TemporalStabilitySensorBlock> TEMPORAL_STABILITY_SENSOR = new BlockRegistryWrapper<>(BLOCKS.register(ACNames.TEMPORAL_STABILITY_SENSOR, (block) -> new TemporalStabilitySensorBlock()));
 
         public static void register(IEventBus bus) {
@@ -100,6 +103,7 @@ public class ACRegistry {
     public static class Items {
         public static ItemRegistryWrapper<Item> WARPING_SPELL_PRISM = new ItemRegistryWrapper<>(ITEMS.register(ACNames.WARPING_SPELL_PRISM, () -> getDefaultBlockItem(Blocks.WARPING_SPELL_PRISM.get())));
         public static ItemRegistryWrapper<Item> SCRYERS_LINKAGE = new ItemRegistryWrapper<>(ITEMS.register(ACNames.SCRYERS_LINKAGE, () -> getDefaultBlockItem(Blocks.SCRYERS_LINKAGE.get())));
+        public static ItemRegistryWrapper<Item> SCROLL_HOLDER = new ItemRegistryWrapper<>(ITEMS.register(ACNames.SCROLL_HOLDER, () -> getDefaultBlockItem(Blocks.SCROLL_HOLDER.get())));
         public static ItemRegistryWrapper<Item> TEMPORAL_STABILITY_SENSOR = new ItemRegistryWrapper<>(ITEMS.register(ACNames.TEMPORAL_STABILITY_SENSOR, () -> getDefaultBlockItem(Blocks.TEMPORAL_STABILITY_SENSOR.get())));
         public static ItemRegistryWrapper<Item> REMOTE = new ItemRegistryWrapper<>(ITEMS.register(ACNames.REMOTE, RemoteItem::new));
         public static ItemRegistryWrapper<Item> PORTABLE_BRAZIER_RELAY = new ItemRegistryWrapper<>(ITEMS.register(ACNames.PORTABLE_BRAZIER_RELAY, PortableBrazierRelayItem::new));
@@ -112,6 +116,7 @@ public class ACRegistry {
     public static class Tiles {
         public static BlockEntityTypeRegistryWrapper<WarpingSpellPrismTile> WARPING_SPELL_PRISM = new BlockEntityTypeRegistryWrapper<>(TILES.register(ACNames.WARPING_SPELL_PRISM, () -> BlockEntityType.Builder.of(WarpingSpellPrismTile::new, Blocks.WARPING_SPELL_PRISM.get()).build(null)));
         public static BlockEntityTypeRegistryWrapper<ScryersLinkageTile> SCRYERS_LINKAGE = new BlockEntityTypeRegistryWrapper<>(TILES.register(ACNames.SCRYERS_LINKAGE, () -> BlockEntityType.Builder.of(ScryersLinkageTile::new, Blocks.SCRYERS_LINKAGE.get()).build(null)));
+        public static BlockEntityTypeRegistryWrapper<ScrollHolderTile> SCROLL_HOLDER = new BlockEntityTypeRegistryWrapper<>(TILES.register(ACNames.SCROLL_HOLDER, () -> BlockEntityType.Builder.of(ScrollHolderTile::new, Blocks.SCROLL_HOLDER.get()).build(null)));
 
         public static void register(IEventBus bus) {
             TILES.register(bus);

@@ -24,6 +24,10 @@ public class ConfigHelper {
             return builder.comment(comment).translation("ars_controle.config." + category + "." + name).define(name, defaultValue);
         }
 
+        public <T extends Comparable<? super T>> ModConfigSpec.ConfigValue<T> makeBounded(String name, T defaultValue, T min, T max, Class<T> clazz, String... comment) {
+            return builder.comment(comment).translation("ars_controle.config." + category + "." + name).defineInRange(name, defaultValue, min, max, clazz);
+        }
+
         public ModConfigSpec.BooleanValue bool(String name, boolean defaultValue, String... comment) {
             return builder.comment(comment).translation("ars_controle.config." + category + "." + name).define(name, defaultValue);
         }

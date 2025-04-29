@@ -39,6 +39,8 @@ public class LootProvider extends LootTableProvider {
         protected void generate() {
             registerDropSelf(ACRegistry.Blocks.WARPING_SPELL_PRISM);
             registerDropSelf(ACRegistry.Blocks.SCRYERS_LINKAGE);
+            registerDropSelf(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR);
+            registerDropSelf(ACRegistry.Blocks.SCROLL_HOLDER);
         }
 
         @Override

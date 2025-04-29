@@ -4,7 +4,7 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
-import dev.qther.ars_controle.datagen.BlockTagProvider;
+import dev.qther.ars_controle.datagen.ACBlockTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import it.unimi.dsi.fastutil.Pair;
@@ -57,7 +57,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         }
 
         var block = targetLevel.getBlockState(targetPos).getBlock();
-        if (BuiltInRegistries.BLOCK.wrapAsHolder(block).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
+        if (BuiltInRegistries.BLOCK.wrapAsHolder(block).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             this.removeBlock();
             return null;
         }
@@ -81,7 +81,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         }
 
         var target = level.getBlockState(block);
-        if (BuiltInRegistries.BLOCK.wrapAsHolder(target.getBlock()).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
+        if (BuiltInRegistries.BLOCK.wrapAsHolder(target.getBlock()).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             return false;
         }
 
@@ -240,7 +240,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             serverLevel.getChunkSource().addRegionTicket(TICKET_TYPE, loadPos, 1, loadPos, true);
         }
         var be = level.getBlockEntity(pos);
-        if (be == null || BuiltInRegistries.BLOCK.wrapAsHolder(be.getBlockState().getBlock()).is(BlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
+        if (be == null || BuiltInRegistries.BLOCK.wrapAsHolder(be.getBlockState().getBlock()).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
             return null;
         }
 
