@@ -38,6 +38,15 @@ public class ACDocumentation {
                 .withIntroPage()
                 .withCraftingPages(ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR));
 
+        addPage(EntryBuilder.of(CRAFTING, ACRegistry.Items.SCROLL_HOLDER)
+                .withIcon(ACRegistry.Items.SCROLL_HOLDER)
+                .withIntroPage()
+                .withCraftingPages(ACRegistry.Items.SCROLL_HOLDER))
+                .withRelations(
+                        item(ItemsRegistry.WARP_SCROLL),
+                        item(ItemsRegistry.STABLE_WARP_SCROLL)
+                );
+
         addPage(EntryBuilder.of(CRAFTING, ACRegistry.Items.REMOTE)
                 .withIcon(ACRegistry.Items.REMOTE)
                 .withIntroPage()

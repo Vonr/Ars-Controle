@@ -28,7 +28,8 @@ public class ACBlockTagProvider extends IntrinsicHolderTagsProvider<Block> {
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ACRegistry.Blocks.WARPING_SPELL_PRISM.get(),
                 ACRegistry.Blocks.SCRYERS_LINKAGE.get(),
-                ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR.get()
+                ACRegistry.Blocks.TEMPORAL_STABILITY_SENSOR.get(),
+                ACRegistry.Blocks.SCROLL_HOLDER.get()
         );
 
         this.tag(SCRYERS_LINKAGE_BLACKLIST).add(

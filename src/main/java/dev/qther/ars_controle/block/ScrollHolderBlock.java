@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -65,15 +66,16 @@ public class ScrollHolderBlock extends ModBlock implements EntityBlock {
     @Override
     protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
         if (!(level instanceof ServerLevel)) {
-            return ItemInteractionResult.CONSUME_PARTIAL;
+            return ItemInteractionResult.SUCCESS;
         }
 
         if (level.getBlockEntity(pos) instanceof ScrollHolderTile tile) {
             var cap = tile.getItemHandler();
-            if (cap.getStackInSlot(0).isEmpty()) {
+            var hasSpace = cap.getStackInSlot(0).isEmpty();
+            if (cap.isItemValid(0, stack)) {
                 cap.insertItem(0, stack, false);
                 return ItemInteractionResult.SUCCESS;
-            } else {
+            } else if (!hasSpace) {
                 var extracted = cap.extractItem(0, 1, false);
                 if (!extracted.isEmpty()) {
                     player.addItem(extracted);
@@ -83,5 +85,18 @@ public class ScrollHolderBlock extends ModBlock implements EntityBlock {
         }
 
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected void onRemove(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState newState, boolean movedByPiston) {
+        if (level instanceof ServerLevel && !newState.is(state.getBlock()) && level.getBlockEntity(pos) instanceof ScrollHolderTile tile) {
+            var stack = tile.getStack();
+            if (!stack.isEmpty()) {
+                var sp = pos.getCenter();
+                level.addFreshEntity(new ItemEntity(level, sp.x, sp.y, sp.z, stack));
+            }
+        }
+
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

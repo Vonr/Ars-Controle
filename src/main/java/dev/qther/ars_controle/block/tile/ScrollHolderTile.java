@@ -29,9 +29,13 @@ public class ScrollHolderTile extends SingleItemTile {
         return new ItemHandler(this);
     }
 
+    public boolean canHoldStack(ItemStack stack) {
+        return stack.getItem() instanceof WarpScroll && stack.has(DataComponentRegistry.WARP_SCROLL);
+    }
+
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == 0 && this.stack.isEmpty() && stack.getItem() instanceof WarpScroll && stack.has(DataComponentRegistry.WARP_SCROLL);
+        return slot == 0 && this.stack.isEmpty() && this.canHoldStack(stack);
     }
 
     private static final Direction[][] ORDERINGS = new Direction[][]{
@@ -94,7 +98,7 @@ public class ScrollHolderTile extends SingleItemTile {
                     }
 
                     distance++;
-                    if (distance > 23) {
+                    if (distance > 22) {
                         continue nextOrder;
                     }
 
@@ -121,13 +125,13 @@ public class ScrollHolderTile extends SingleItemTile {
             if (cursor.setWithOffset(cursor, lastDir).equals(this.getBlockPos())) {
                 for (int i = 1; i < 3; ++i) {
                     var distance = vertices[i].distManhattan(vertices[i + 1]);
-                    if (distance < 2 || distance > 23) {
+                    if (distance < 2 || distance > 22) {
                         continue nextOrder;
                     }
                 }
 
                 var distance = vertices[1].distManhattan(vertices[4]);
-                if (distance < 2 || distance > 23) {
+                if (distance < 2 || distance > 22) {
                     continue;
                 }
 
@@ -177,12 +181,12 @@ public class ScrollHolderTile extends SingleItemTile {
                 for (var pos : BlockPos.betweenClosed(start, end)) {
                     if (!this.stack.isEmpty() && level.getBlockState(pos).isAir()) {
                         if (needsSource) {
+                            needsSource = false;
                             var taken = SourceUtil.takeSourceMultipleWithParticles(this.getBlockPos(), level, 10, 1000);
                             if (taken == null || taken.isEmpty()) {
                                 continue nextOrder;
                             }
                         }
-
                         level.setBlock(pos, BlockRegistry.PORTAL_BLOCK.defaultBlockState().setValue(PortalBlock.AXIS, axis), 18);
                         if (level.getBlockEntity(pos) instanceof PortalTile tile) {
                             tile.setFromScroll(data);
