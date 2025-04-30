@@ -5,7 +5,6 @@ import com.hollingsworth.arsnouveau.common.block.PortalBlock;
 import com.hollingsworth.arsnouveau.common.block.tile.PortalTile;
 import com.hollingsworth.arsnouveau.common.block.tile.SingleItemTile;
 import com.hollingsworth.arsnouveau.common.datagen.BlockTagProvider;
-import com.hollingsworth.arsnouveau.common.items.WarpScroll;
 import com.hollingsworth.arsnouveau.setup.config.ServerConfig;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import com.hollingsworth.arsnouveau.setup.registry.DataComponentRegistry;
@@ -27,7 +26,8 @@ public class ScrollHolderTile extends SingleItemTile {
     }
 
     public boolean canHoldStack(ItemStack stack) {
-        return stack.getItem() instanceof WarpScroll && stack.has(DataComponentRegistry.WARP_SCROLL);
+        var data = stack.get(DataComponentRegistry.WARP_SCROLL);
+        return data != null && data.isValid();
     }
 
     @Override
@@ -117,6 +117,12 @@ public class ScrollHolderTile extends SingleItemTile {
 
             if (lastDir == null) {
                 continue;
+            }
+
+            for (var vertex : vertices) {
+                if (vertex == null) {
+                    continue nextOrder;
+                }
             }
 
             if (cursor.setWithOffset(cursor, lastDir).equals(this.getBlockPos())) {
