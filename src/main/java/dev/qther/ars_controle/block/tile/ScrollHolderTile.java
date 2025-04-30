@@ -26,10 +26,6 @@ public class ScrollHolderTile extends SingleItemTile {
         super(ACRegistry.Tiles.SCROLL_HOLDER.get(), pos, state);
     }
 
-    public ItemHandler getItemHandler() {
-        return new ItemHandler(this);
-    }
-
     public boolean canHoldStack(ItemStack stack) {
         return stack.getItem() instanceof WarpScroll && stack.has(DataComponentRegistry.WARP_SCROLL);
     }
@@ -225,61 +221,59 @@ public class ScrollHolderTile extends SingleItemTile {
         this.update();
     }
 
-    public static class ItemHandler implements IItemHandler {
-        ScrollHolderTile tile;
+    public IItemHandler getItemHandler() {
+        return new IItemHandler() {
+            final ScrollHolderTile tile = ScrollHolderTile.this;
 
-        public ItemHandler(ScrollHolderTile tile) {
-            this.tile = tile;
-        }
+            @Override
+            public int getSlots() {
+                return this.tile.getContainerSize();
+            }
 
-        @Override
-        public int getSlots() {
-            return this.tile.getContainerSize();
-        }
+            @Override
+            public @NotNull ItemStack getStackInSlot(int slot) {
+                return this.tile.getItem(slot);
+            }
 
-        @Override
-        public @NotNull ItemStack getStackInSlot(int slot) {
-            return this.tile.getItem(slot);
-        }
+            @Override
+            public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+                if (!this.isItemValid(slot, stack)) {
+                    return stack;
+                }
 
-        @Override
-        public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            if (!this.isItemValid(slot, stack)) {
+                if (simulate) {
+                    return stack.copyWithCount(stack.getCount() - 1);
+                }
+
+                this.tile.stack = stack.split(1);
+                this.tile.setChanged();
                 return stack;
             }
 
-            if (simulate) {
-                return stack.copyWithCount(stack.getCount() - 1);
+            @Override
+            public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+                if (slot != 0 || amount <= 0 || this.tile.stack.isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+
+                if (simulate) {
+                    return this.tile.stack.copyWithCount(1);
+                }
+
+                var extracted = this.tile.stack.split(amount);
+                this.tile.setChanged();
+                return extracted;
             }
 
-            this.tile.stack = stack.split(1);
-            this.tile.setChanged();
-            return stack;
-        }
-
-        @Override
-        public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot != 0 || amount <= 0 || this.tile.stack.isEmpty()) {
-                return ItemStack.EMPTY;
+            @Override
+            public int getSlotLimit(int slot) {
+                return slot == 0 ? 1 : 0;
             }
 
-            if (simulate) {
-                return this.tile.stack.copyWithCount(1);
+            @Override
+            public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+                return this.tile.canPlaceItem(slot, stack);
             }
-
-            var extracted = this.tile.stack.split(amount);
-            this.tile.setChanged();
-            return extracted;
-        }
-
-        @Override
-        public int getSlotLimit(int slot) {
-            return slot == 0 ? 1 : 0;
-        }
-
-        @Override
-        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return this.tile.canPlaceItem(slot, stack);
-        }
+        };
     }
 }

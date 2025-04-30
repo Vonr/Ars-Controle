@@ -1,12 +1,11 @@
 package dev.qther.ars_controle;
 
-import dev.qther.ars_controle.block.tile.ScrollHolderTile;
 import dev.qther.ars_controle.cc.ArsControleCCCompat;
 import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.datagen.Setup;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.packets.ACNetworking;
-import dev.qther.ars_controle.registry.*;
+import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -45,7 +44,7 @@ public class ArsControle {
     }
 
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ACRegistry.Tiles.SCROLL_HOLDER.get(), (tile, context) -> new ScrollHolderTile.ItemHandler(tile));
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ACRegistry.Tiles.SCROLL_HOLDER.get(), (tile, context) -> tile.getItemHandler());
 
         if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
             ArsControleCCCompat.register(event);
