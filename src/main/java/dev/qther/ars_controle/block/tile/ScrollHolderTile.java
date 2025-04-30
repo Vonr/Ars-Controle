@@ -167,15 +167,23 @@ public class ScrollHolderTile extends SingleItemTile {
                 }
 
                 Direction.Axis axis;
-                boolean horizontal = false;
+                axis = Direction.Axis.Y;
+                boolean horizontal = true;
 
-                if (vertices[1].getY() == vertices[2].getY()) {
-                    axis = Direction.Axis.Y;
-                    horizontal = true;
-                } else if (vertices[2].getX() != vertices[3].getX()) {
-                    axis = Direction.Axis.X;
-                } else {
-                    axis = Direction.Axis.Z;
+                var firstY = vertices[1].getY();
+                for (int i = 2; i < 4; ++i) {
+                    if (vertices[i].getY() != firstY) {
+                        horizontal = false;
+                    }
+                }
+
+                if (!horizontal) {
+                    var facingHorizontal = facing.getAxis().isHorizontal();
+                    if (vertices[facingHorizontal ? 1 : 2].getX() != vertices[facingHorizontal ? 2 : 3].getX()) {
+                        axis = Direction.Axis.X;
+                    } else {
+                        axis = Direction.Axis.Z;
+                    }
                 }
 
                 var data = this.stack.get(DataComponentRegistry.WARP_SCROLL);
