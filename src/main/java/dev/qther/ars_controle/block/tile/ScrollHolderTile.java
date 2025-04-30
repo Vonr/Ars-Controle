@@ -50,7 +50,7 @@ public class ScrollHolderTile extends SingleItemTile {
         var state = this.getBlockState();
         var facing = state.getValue(ScrollHolderBlock.FACING);
 
-        level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), 2);
+        level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), 3);
 
         if (!ServerConfig.ENABLE_WARP_PORTALS.get()) {
             return;

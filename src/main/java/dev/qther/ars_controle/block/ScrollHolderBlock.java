@@ -2,6 +2,7 @@ package dev.qther.ars_controle.block;
 
 import com.hollingsworth.arsnouveau.common.block.ModBlock;
 import com.hollingsworth.arsnouveau.common.block.PortalBlock;
+import com.hollingsworth.arsnouveau.common.util.VoxelShapeUtils;
 import dev.qther.ars_controle.block.tile.ScrollHolderTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,15 +13,23 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Stream;
 
 public class ScrollHolderBlock extends ModBlock implements EntityBlock {
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
@@ -98,5 +107,48 @@ public class ScrollHolderBlock extends ModBlock implements EntityBlock {
         }
 
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
+    protected boolean hasAnalogOutputSignal(@NotNull BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos) {
+        return state.getValue(HAS_SCROLL) ? 15 : 0;
+    }
+
+    public static final VoxelShape UP = Stream.of(
+            Shapes.box(0, 0.875, 0, 1, 1, 1),
+            Shapes.box(0, 0, 0, 1, 0.125, 0.375),
+            Shapes.box(0, 0, 0.375, 0.375, 0.125, 0.625),
+            Shapes.box(0.375, 0.0625, 0.375, 0.625, 0.1875, 0.625),
+            Shapes.box(0.625, 0, 0.375, 1, 0.125, 0.625),
+            Shapes.box(0, 0, 0.625, 1, 0.125, 1),
+            Shapes.box(0.375, 0.8125, 0.375, 0.625, 0.875, 0.625),
+            Shapes.box(0, 0.125, 0, 0.375, 0.875, 0.375),
+            Shapes.box(0.625, 0.125, 0, 1, 0.875, 0.375),
+            Shapes.box(0, 0.125, 0.625, 0.375, 0.875, 1),
+            Shapes.box(0.625, 0.125, 0.625, 1, 0.875, 1)
+    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+
+    public static final VoxelShape DOWN = VoxelShapeUtils.rotate(UP, Direction.UP);
+    public static final VoxelShape EAST = VoxelShapeUtils.rotate(UP, Direction.WEST);
+    public static final VoxelShape WEST = VoxelShapeUtils.rotate(UP, Direction.EAST);
+    public static final VoxelShape NORTH = VoxelShapeUtils.rotate(UP, Direction.SOUTH);
+    public static final VoxelShape SOUTH = VoxelShapeUtils.rotate(UP, Direction.NORTH);
+
+    @Override
+    public @NotNull VoxelShape getShape(BlockState state, @NotNull BlockGetter worldIn, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+        Direction facing = state.getValue(BlockStateProperties.FACING);
+        return switch (facing) {
+            case UP -> UP;
+            case DOWN -> DOWN;
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case WEST -> WEST;
+            case EAST -> EAST;
+        };
     }
 }
