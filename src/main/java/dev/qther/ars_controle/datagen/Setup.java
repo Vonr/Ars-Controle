@@ -15,6 +15,7 @@ public class Setup {
         gen.addProvider(event.includeServer(), new ArsProviders.ImbuementProvider(gen));
         gen.addProvider(event.includeServer(), new ArsProviders.GlyphProvider(gen));
         gen.addProvider(event.includeServer(), new ArsProviders.EnchantingAppProvider(gen));
+        gen.addProvider(event.includeServer(), new ACRecipeDatagen(output, provider));
 
         gen.addProvider(event.includeServer(), new BlockStateDatagen(output, fileHelper));
         gen.addProvider(event.includeServer(), new LootProvider(output, provider));
