@@ -2,6 +2,11 @@
 
 Addon for Ars Nouveau focused on increasing control.
 
+## Translations
+
+Help to translate this mod with [Crowdin](https://crowdin.com/project/ars-controle).  
+If your language is unavailable, feel free to request it!
+
 ## Content
 
 ### Blocks
