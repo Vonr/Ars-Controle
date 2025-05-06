@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ public class ScrollHolderTile extends SingleItemTile {
         var state = this.getBlockState();
         var facing = state.getValue(ScrollHolderBlock.FACING);
 
-        level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), 3);
+        level.setBlock(this.getBlockPos(), state.setValue(ScrollHolderBlock.HAS_SCROLL, !this.stack.isEmpty()), Block.UPDATE_ALL);
 
         if (!ServerConfig.ENABLE_WARP_PORTALS.get()) {
             return;
