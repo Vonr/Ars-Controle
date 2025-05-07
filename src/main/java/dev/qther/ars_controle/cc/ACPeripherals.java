@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
-public class ArsControleCCCompat {
+public class ACPeripherals {
     public static void register(RegisterCapabilitiesEvent event) {
         ArsControle.LOGGER.info("Registering capabilities for CC compat");
         event.registerBlockEntity(PeripheralCapability.get(), ACRegistry.Tiles.WARPING_SPELL_PRISM.get(), (b, d) -> new WarpingSpellPrismPeripheral(ACNames.WARPING_SPELL_PRISM, b));

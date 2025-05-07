@@ -23,8 +23,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class LootProvider extends LootTableProvider {
-    public LootProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> registries) {
+public class ACLootProvider extends LootTableProvider {
+    public ACLootProvider(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> registries) {
         super(pOutput, new ObjectOpenHashSet<>(), List.of(new LootTableProvider.SubProviderEntry(BlockLootTable::new, LootContextParamSets.BLOCK)), registries);
     }
 

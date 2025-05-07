@@ -27,7 +27,7 @@ import java.nio.file.Path;
 
 import static com.hollingsworth.arsnouveau.setup.registry.RegistryHelper.getRegistryName;
 
-public class ArsProviders {
+public class ACArsProviders {
 
     static String root = ArsControle.MODID;
 

@@ -2,18 +2,22 @@ package dev.qther.ars_controle.item;
 
 import com.hollingsworth.arsnouveau.api.registry.RitualRegistry;
 import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
+import com.hollingsworth.arsnouveau.api.ritual.ConjureBiomeRitual;
+import com.hollingsworth.arsnouveau.api.ritual.FeaturePlacementRitual;
+import com.hollingsworth.arsnouveau.api.ritual.StructureRitual;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualBrazierTile;
 import com.hollingsworth.arsnouveau.common.items.ModItem;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.qther.ars_controle.datagen.ItemTagProvider;
-import dev.qther.ars_controle.registry.ACRegistry;
-import dev.qther.ars_controle.util.Cached;
+import dev.qther.ars_controle.datagen.ACItemTagProvider;
 import dev.qther.ars_controle.mixin.AbstractRitualInvoker;
 import dev.qther.ars_controle.packets.clientbound.PacketSyncAssociation;
+import dev.qther.ars_controle.registry.ACRegistry;
+import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.util.RenderQueue;
 import dev.qther.ars_controle.util.RenderUtil;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
@@ -72,7 +76,7 @@ public class PortableBrazierRelayItem extends ModItem {
                             continue;
                         }
 
-                        var brazier = getBrazier(level, null, stack);
+                        var brazier = getBrazier(null, stack);
                         if (brazier == null) {
                             continue;
                         }
@@ -118,18 +122,15 @@ public class PortableBrazierRelayItem extends ModItem {
             return super.useOn(context);
         }
 
-        if (brazier.ritual != null) {
-            var tablet = RitualRegistry.getRitualItemMap().get(brazier.ritual.getRegistryName());
-            if (tablet != null && BuiltInRegistries.ITEM.wrapAsHolder(tablet).is(ItemTagProvider.RITUAL_BLACKLIST)) {
-                PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(tablet.getDescriptionId())));
-                return InteractionResult.FAIL;
-            }
+        if (!canRelay(brazier.ritual)) {
+            PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(Util.makeDescriptionId("item", brazier.ritual.getRegistryName()))));
+            return InteractionResult.FAIL;
         }
 
         var stack = context.getItemInHand();
         var relayData = PortableBrazierRelayData.fromItemStack(stack);
 
-        var currentBrazier = getBrazier(level, player, stack);
+        var currentBrazier = getBrazier(player, stack);
         if (currentBrazier != null) {
             currentBrazier.removeData(ACRegistry.Attachments.RELAY_UUID);
             currentBrazier.removeData(ACRegistry.Attachments.ASSOCIATION);
@@ -186,7 +187,7 @@ public class PortableBrazierRelayItem extends ModItem {
         }
 
         if (serverLevel.getGameTime() % 20 == 0) {
-            var brazier = getBrazier(serverLevel, entity, stack);
+            var brazier = getBrazier(entity, stack);
             if (brazier == null) {
                 return;
             }
@@ -221,7 +222,7 @@ public class PortableBrazierRelayItem extends ModItem {
         ((AbstractRitualInvoker) ritual).invokeTick();
     }
 
-    public static RitualBrazierTile getBrazier(ServerLevel level, @Nullable Entity entity, ItemStack stack) {
+    public static RitualBrazierTile getBrazier(@Nullable Entity entity, ItemStack stack) {
         var data = PortableBrazierRelayData.fromItemStack(stack);
         if (data.pos.isEmpty() || data.uuid.isEmpty()) {
             return null;
@@ -254,14 +255,30 @@ public class PortableBrazierRelayItem extends ModItem {
             return null;
         }
 
-        var tablet = RitualRegistry.getRitualItemMap().get(brazier.ritual.getRegistryName());
-        if (tablet != null && BuiltInRegistries.ITEM.wrapAsHolder(tablet).is(ItemTagProvider.RITUAL_BLACKLIST)) {
-            PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(tablet.getDescriptionId())));
+        if (!canRelay(brazier.ritual)) {
+            PortUtil.sendMessageNoSpam(entity, Component.translatable("ars_controle.portable_brazier_relay.blacklisted_ritual", Component.translatable(Util.makeDescriptionId("item", brazier.ritual.getRegistryName()))));
             stack.remove(ACRegistry.Components.PORTABLE_BRAZIER_RELAY);
+            brazier.removeData(ACRegistry.Attachments.RELAY_UUID);
+            brazier.removeData(ACRegistry.Attachments.ASSOCIATION);
+            PacketDistributor.sendToPlayersTrackingChunk(targetLevel, new ChunkPos(brazier.getBlockPos()), new PacketSyncAssociation(target, null));
             return null;
         }
 
         return brazier;
+    }
+
+    public static boolean canRelay(AbstractRitual ritual) {
+        if (ritual instanceof ConjureBiomeRitual || ritual instanceof StructureRitual || ritual instanceof FeaturePlacementRitual) {
+            return false;
+        }
+
+        var tablet = RitualRegistry.getRitualItemMap().get(ritual.getRegistryName());
+
+        if (tablet == null) {
+            return false;
+        }
+
+        return !BuiltInRegistries.ITEM.wrapAsHolder(tablet).is(ACItemTagProvider.RITUAL_BLACKLIST);
     }
 
     @Override

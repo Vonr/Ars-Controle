@@ -12,10 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class LangDatagen extends LanguageProvider {
+public class ACLangDatagen extends LanguageProvider {
     private final Map<String, String> data = new TreeMap<>();
 
-    public LangDatagen(PackOutput output, String modid, String locale) {
+    public ACLangDatagen(PackOutput output, String modid, String locale) {
         super(output, modid, locale);
     }
 

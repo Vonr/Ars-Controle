@@ -74,12 +74,12 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
 
         map.put("type", hit.getType().toString().toLowerCase(Locale.ENGLISH));
         var loc = hit.getLocation();
-        map.put("location", ArsControleCCCompat.vecToMap(loc));
+        map.put("location", ACPeripherals.vecToMap(loc));
 
         if (hit instanceof BlockHitResult bhr) {
             var bp = bhr.getBlockPos();
             var inner = new Object2ObjectArrayMap<String, Object>(2);
-            inner.put("pos", ArsControleCCCompat.blockPosToMap(bp));
+            inner.put("pos", ACPeripherals.blockPosToMap(bp));
             inner.put("level", this.owner.getTargetLevel().dimension().location().toString());
             map.put("block", inner);
         } else if (hit instanceof EntityHitResult ehr) {
@@ -87,8 +87,8 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
             var inner = new Object2ObjectArrayMap<String, Object>(11);
             inner.put("type", BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
             inner.put("name", e.getName().getString());
-            inner.put("pos", ArsControleCCCompat.vecToMap(e.getPosition(1.0f)));
-            inner.put("eyePos", ArsControleCCCompat.vecToMap(e.getEyePosition()));
+            inner.put("pos", ACPeripherals.vecToMap(e.getPosition(1.0f)));
+            inner.put("eyePos", ACPeripherals.vecToMap(e.getEyePosition()));
             inner.put("level", e.level().dimension().location().toString());
             inner.put("yaw", Mth.wrapDegrees(e.getYRot()));
             inner.put("pitch", Mth.wrapDegrees(e.getXRot()));

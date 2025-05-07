@@ -1,8 +1,8 @@
 package dev.qther.ars_controle;
 
-import dev.qther.ars_controle.cc.ArsControleCCCompat;
+import dev.qther.ars_controle.cc.ACPeripherals;
 import dev.qther.ars_controle.config.ACServerConfig;
-import dev.qther.ars_controle.datagen.Setup;
+import dev.qther.ars_controle.datagen.ACSetup;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.packets.ACNetworking;
 import dev.qther.ars_controle.registry.ACRegistry;
@@ -30,7 +30,7 @@ public class ArsControle {
     public ArsControle(IEventBus bus, ModContainer container) {
         ACRegistry.register(bus);
 
-        bus.addListener(Setup::gatherData);
+        bus.addListener(ACSetup::gatherData);
         bus.addListener(ACNetworking::register);
         bus.addListener(this::onRegisterCapabilities);
 
@@ -47,7 +47,7 @@ public class ArsControle {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ACRegistry.Tiles.SCROLL_HOLDER.get(), (tile, context) -> tile.getItemHandler());
 
         if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
-            ArsControleCCCompat.register(event);
+            ACPeripherals.register(event);
         }
 
         for (var erasedCap : BlockCapability.getAll()) {

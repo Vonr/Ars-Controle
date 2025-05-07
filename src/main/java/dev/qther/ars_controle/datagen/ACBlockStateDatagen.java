@@ -12,10 +12,10 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.function.Supplier;
 
-public class BlockStateDatagen extends BlockStateProvider {
+public class ACBlockStateDatagen extends BlockStateProvider {
     private final ExistingFileHelper fileHelper;
 
-    public BlockStateDatagen(PackOutput output, ExistingFileHelper exFileHelper) {
+    public ACBlockStateDatagen(PackOutput output, ExistingFileHelper exFileHelper) {
         super(output, ArsControle.MODID, exFileHelper);
         this.fileHelper = exFileHelper;
     }
