@@ -31,7 +31,7 @@ public class ACLangDatagen extends LanguageProvider {
                 spellPart.addAugmentDescriptions(augmentDescriptions);
 
                 for (AbstractAugment augment : augmentDescriptions.keySet()) {
-                    add("ars_controle.augment_desc." + registryName.getPath() + "_" + augment.getRegistryName().getPath(), augmentDescriptions.get(augment));
+                    add("ars_nouveau.augment_desc." + registryName.getPath() + "_" + augment.getRegistryName().getPath(), augmentDescriptions.get(augment));
                 }
             }
         }
