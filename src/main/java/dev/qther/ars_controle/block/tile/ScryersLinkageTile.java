@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.datagen.ACBlockTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
@@ -223,8 +224,6 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         return list;
     }
 
-    public static final TicketType<ChunkPos> TICKET_TYPE = TicketType.create("scryers_linkage", Comparator.comparingLong(ChunkPos::toLong), 1);
-
     @SuppressWarnings("SameParameterValue")
     private <T> @Nullable T getTargetAs(Class<T> clazz) {
         var info = this.getTargetInfo();
@@ -237,7 +236,16 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
 
         var loadPos = new ChunkPos(pos);
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.getChunkSource().addRegionTicket(TICKET_TYPE, loadPos, 1, loadPos, true);
+            int loadTime = ACServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
+            if (loadTime > 0) {
+                serverLevel.getChunkSource().addRegionTicket(
+                        TicketType.create("scryers_linkage", Comparator.comparingLong(ChunkPos::toLong), loadTime),
+                        loadPos,
+                        1,
+                        loadPos,
+                        true
+                );
+            }
         }
         var be = level.getBlockEntity(pos);
         if (be == null || BuiltInRegistries.BLOCK.wrapAsHolder(be.getBlockState().getBlock()).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {

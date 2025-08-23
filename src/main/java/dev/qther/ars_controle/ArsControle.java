@@ -2,6 +2,7 @@ package dev.qther.ars_controle;
 
 import dev.qther.ars_controle.cc.ACPeripherals;
 import dev.qther.ars_controle.config.ACServerConfig;
+import dev.qther.ars_controle.config.ACStartupConfig;
 import dev.qther.ars_controle.datagen.ACSetup;
 import dev.qther.ars_controle.item.PortableBrazierRelayItem;
 import dev.qther.ars_controle.packets.ACNetworking;
@@ -10,9 +11,9 @@ import dev.qther.ars_controle.util.Cached;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -33,9 +34,11 @@ public class ArsControle {
         bus.addListener(ACSetup::gatherData);
         bus.addListener(ACNetworking::register);
         bus.addListener(this::onRegisterCapabilities);
+        bus.addListener(ACStartupConfig::onLoad);
 
         NeoForge.EVENT_BUS.addListener(ArsControle::onServerStopped);
 
+        container.registerConfig(ModConfig.Type.STARTUP, ACStartupConfig.SPEC);
         container.registerConfig(ModConfig.Type.SERVER, ACServerConfig.SPEC);
     }
 
@@ -46,15 +49,21 @@ public class ArsControle {
     public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ACRegistry.Tiles.SCROLL_HOLDER.get(), (tile, context) -> tile.getItemHandler());
 
-        if (FMLLoader.getLoadingModList().getMods().stream().anyMatch(m -> m.getModId().equals("computercraft"))) {
+        if (ModList.get().isLoaded("computercraft")) {
             ACPeripherals.register(event);
         }
 
-        for (var erasedCap : BlockCapability.getAll()) {
-            try {
-                var cap = (BlockCapability<Object, Object>) erasedCap;
+        nextCap: for (var cap : BlockCapability.getAll()) {
+            for (var c : ACStartupConfig.STARTUP.SCRYERS_LINKAGE_BLACKLISTED_CLASSES) {
+                if (cap.typeClass().isAssignableFrom(c)) {
+                    continue nextCap;
+                }
+            }
 
-                event.registerBlockEntity(cap, ACRegistry.Tiles.SCRYERS_LINKAGE.get(), (linkage, context) -> {
+            try {
+                var erased = (BlockCapability<Object, Object>) cap;
+
+                event.registerBlockEntity(erased, ACRegistry.Tiles.SCRYERS_LINKAGE.get(), (linkage, context) -> {
                     var info = linkage.getTargetInfo();
                     if (info == null) {
                         return null;
@@ -63,7 +72,7 @@ public class ArsControle {
                     var level = info.first();
                     var block = info.second();
 
-                    return level.getCapability(cap, block, context);
+                    return level.getCapability(erased, block, context);
                 });
             } catch (ClassCastException e) {
                 LOGGER.error("Could not register capability for linkage", e);
