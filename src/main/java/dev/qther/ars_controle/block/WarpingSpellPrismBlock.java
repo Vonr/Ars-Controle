@@ -125,22 +125,20 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         }
 
         var hitPos = BlockPos.containing(hit.getLocation());
-        if (!dim.isLoaded(hitPos)) {
-            int loadTime = ACServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
-            if (loadTime > 0) {
-                var loadPos = new ChunkPos(hitPos);
-                dim.getChunkSource().addRegionTicket(
-                        TicketType.create("warping_spell_prism", Comparator.comparingLong(ChunkPos::toLong), loadTime),
-                        loadPos,
-                        3,
-                        loadPos,
-                        true
-                );
-            } else {
-                world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
-                spell.remove(RemovalReason.DISCARDED);
-                return;
-            }
+        int loadTime = ACServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
+        if (loadTime > 0) {
+            var loadPos = new ChunkPos(hitPos);
+            dim.getChunkSource().addRegionTicket(
+                    TicketType.create("warping_spell_prism", Comparator.comparingLong(ChunkPos::toLong), loadTime),
+                    loadPos,
+                    3,
+                    loadPos,
+                    true
+            );
+        } else if (!dim.isLoaded(hitPos)) {
+            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            spell.remove(RemovalReason.DISCARDED);
+            return;
         }
 
         var oldLevel = spell.level();
