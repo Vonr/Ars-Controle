@@ -55,7 +55,7 @@ public class ArsControle {
 
         nextCap: for (var cap : BlockCapability.getAll()) {
             for (var c : ACStartupConfig.STARTUP.SCRYERS_LINKAGE_BLACKLISTED_CLASSES) {
-                if (cap.typeClass().isAssignableFrom(c)) {
+                if (c.isAssignableFrom(cap.typeClass())) {
                     continue nextCap;
                 }
             }
@@ -72,7 +72,26 @@ public class ArsControle {
                     var level = info.first();
                     var block = info.second();
 
-                    return level.getCapability(erased, block, context);
+                    Object targetCap;
+                    try {
+                        targetCap = level.getCapability(erased, block, context);
+                    } catch (StackOverflowError ignored) {
+                        LOGGER.warn("Detected stack overflow when trying to query {} capability of Scryer's Linkage at {} in {}, removing target to resolve.", erased.name(), linkage.getBlockPos(), linkage.getLevel() != null ? linkage.getLevel().dimension().location() : "<null>");
+                        linkage.removeBlock();
+                        return null;
+                    }
+
+                    if (targetCap == null) {
+                        return null;
+                    }
+
+                    for (var c : ACStartupConfig.STARTUP.SCRYERS_LINKAGE_BLACKLISTED_CLASSES) {
+                        if (c.isAssignableFrom(targetCap.getClass())) {
+                            return null;
+                        }
+                    }
+
+                    return targetCap;
                 });
             } catch (ClassCastException e) {
                 LOGGER.error("Could not register capability for linkage", e);
