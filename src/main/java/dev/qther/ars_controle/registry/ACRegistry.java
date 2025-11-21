@@ -20,6 +20,7 @@ import dev.qther.ars_controle.spell.filter.FilterBinary;
 import dev.qther.ars_controle.spell.filter.FilterRandom;
 import dev.qther.ars_controle.spell.filter.FilterUnary;
 import dev.qther.ars_controle.spell.filter.FilterYLevel;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -68,6 +69,18 @@ public class ACRegistry {
 
         public static final Supplier<AttachmentType<UUID>> ASSOCIATION = ATTACHMENT_TYPES.register(
                 "association", () -> AttachmentType.builder(() -> new UUID(0, 0)).serialize(UUIDUtil.CODEC).build()
+        );
+
+        public static final Supplier<AttachmentType<GlobalPos>> GLOBAL_POS_TARGET = ATTACHMENT_TYPES.register(
+                "block_target", () -> AttachmentType.<GlobalPos>builder(() -> {
+                    throw new UnsupportedOperationException();
+                }).serialize(GlobalPos.CODEC).build()
+        );
+
+        public static final Supplier<AttachmentType<UUID>> ENTITY_TARGET = ATTACHMENT_TYPES.register(
+                "entity_target", () -> AttachmentType.<UUID>builder(() -> {
+                    throw new UnsupportedOperationException();
+                }).serialize(UUIDUtil.CODEC).build()
         );
 
         public static void register(IEventBus bus) {

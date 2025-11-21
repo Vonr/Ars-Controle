@@ -4,7 +4,6 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
-import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.datagen.ACBlockTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
@@ -14,65 +13,60 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
 import java.util.List;
 
-public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimensionalHighlighter, Container {
+public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimensionalHighlighter {
     public ScryersLinkageTile(BlockPos pos, BlockState state) {
         super(ACRegistry.Tiles.SCRYERS_LINKAGE.get(), pos, state);
     }
 
-    public @Nullable GlobalPos getTarget() {
-        var info = this.getTargetInfo();
-        if (info == null) {
-            return null;
-        }
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        var data = this.getPersistentData();
 
-        return new GlobalPos(info.first().dimension(), info.second());
+        if (data.contains("block", CompoundTag.TAG_LONG) && data.contains("dimension", CompoundTag.TAG_STRING)) {
+            var block = data.getLong("block");
+            var dimension = data.getString("dimension");
+            this.setData(ACRegistry.Attachments.GLOBAL_POS_TARGET, new GlobalPos(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimension)), BlockPos.of(block)));
+        }
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        var data = this.getPersistentData();
+        data.remove("block");
+        data.remove("dimension");
+        super.saveAdditional(tag, registries);
+    }
+
+    public @Nullable GlobalPos getTarget() {
+        return this.getExistingData(ACRegistry.Attachments.GLOBAL_POS_TARGET).orElse(null);
     }
 
     public @Nullable Pair<Level, BlockPos> getTargetInfo() {
-        if (level == null) {
+        var pos = this.getTarget();
+        if (pos == null) {
             return null;
         }
-
-        var targetLevel = this.getTargetLevel();
-        var targetPos = this.getTargetBlock();
-        if (targetLevel == null || targetPos == null) {
-            return null;
-        }
-
-        var block = targetLevel.getBlockState(targetPos).getBlock();
-        if (BuiltInRegistries.BLOCK.wrapAsHolder(block).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
-            this.removeBlock();
-            return null;
-        }
-
-        return Pair.of(targetLevel, targetPos);
+        return Pair.of(Cached.getLevelByKey(pos.dimension()), pos.pos());
     }
 
     public boolean hasTarget() {
-        if (level == null) {
-            return false;
-        }
-
-        var tag = this.getPersistentData();
-        return tag.contains("block", CompoundTag.TAG_LONG);
+        return this.hasData(ACRegistry.Attachments.GLOBAL_POS_TARGET);
     }
 
     public boolean setBlock(@NotNull Level level, @NotNull BlockPos block) {
@@ -86,9 +80,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             return false;
         }
 
-        var tag = this.getPersistentData();
-        tag.putString("dimension", level.dimension().location().toString());
-        tag.putLong("block", block.asLong());
+        this.setData(ACRegistry.Attachments.GLOBAL_POS_TARGET, new GlobalPos(level.dimension(), block));
         this.notifyChange();
 
         return true;
@@ -100,9 +92,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             return;
         }
 
-        var tag = this.getPersistentData();
-        tag.remove("dimension");
-        tag.remove("block");
+        this.removeData(ACRegistry.Attachments.GLOBAL_POS_TARGET);
         this.notifyChange();
     }
 
@@ -127,13 +117,12 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             return null;
         }
 
-        var tag = this.getPersistentData();
-        var s = tag.contains("dimension", 8) ? tag.getString("dimension") : null;
-        if (s == null) {
+        var target = this.getTarget();
+        if (target == null) {
             return null;
         }
 
-        if (s.equals(level.dimension().location().toString())) {
+        if (level.dimension().equals(target.dimension())) {
             return level;
         }
 
@@ -141,7 +130,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             return null;
         }
 
-        return Cached.getLevelByName(s);
+        return Cached.getLevelByKey(target.dimension());
     }
 
     private @Nullable BlockPos getTargetBlock() {
@@ -149,23 +138,12 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             return null;
         }
 
-        var tag = this.getPersistentData();
-        return tag.contains("block", CompoundTag.TAG_LONG) ? BlockPos.of(tag.getLong("block")) : null;
-    }
-
-    @Override
-    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-
-        var pos = this.getTargetBlock();
-        if (pos != null) {
-            tag.putLong("block", pos.asLong());
+        var target = this.getTarget();
+        if (target == null) {
+            return null;
         }
 
-        var level = this.getTargetLevel();
-        if (level != null) {
-            tag.putString("dimension", level.dimension().location().toString());
-        }
+        return target.pos();
     }
 
     @Override
@@ -222,92 +200,5 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             list.add(ColorPos.centered(target.second()));
         }
         return list;
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private <T> @Nullable T getTargetAs(Class<T> clazz) {
-        var info = this.getTargetInfo();
-        if (info == null) {
-            return null;
-        }
-
-        var level = info.first();
-        var pos = info.second();
-
-        var loadPos = new ChunkPos(pos);
-        if (level instanceof ServerLevel serverLevel) {
-            int loadTime = ACServerConfig.SERVER.WARPING_SPELL_PRISM_LOAD_TIME.get();
-            if (loadTime > 0) {
-                serverLevel.getChunkSource().addRegionTicket(
-                        TicketType.create("scryers_linkage", Comparator.comparingLong(ChunkPos::toLong), loadTime),
-                        loadPos,
-                        1,
-                        loadPos,
-                        true
-                );
-            }
-        }
-        var be = level.getBlockEntity(pos);
-        if (be == null || BuiltInRegistries.BLOCK.wrapAsHolder(be.getBlockState().getBlock()).is(ACBlockTagProvider.SCRYERS_LINKAGE_BLACKLIST)) {
-            return null;
-        }
-
-        if (clazz.isAssignableFrom(be.getClass())) {
-            return clazz.cast(be);
-        }
-
-        return null;
-    }
-
-    @Override
-    public int getContainerSize() {
-        var container = this.getTargetAs(Container.class);
-        return container == null ? 0 : container.getContainerSize();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        var container = this.getTargetAs(Container.class);
-        return container == null || container.isEmpty();
-    }
-
-    @Override
-    public @NotNull ItemStack getItem(int i) {
-        var container = this.getTargetAs(Container.class);
-        return container == null ? ItemStack.EMPTY : container.getItem(i);
-    }
-
-    @Override
-    public @NotNull ItemStack removeItem(int i, int i1) {
-        var container = this.getTargetAs(Container.class);
-        return container == null ? ItemStack.EMPTY : container.removeItem(i, i1);
-    }
-
-    @Override
-    public @NotNull ItemStack removeItemNoUpdate(int i) {
-        var container = this.getTargetAs(Container.class);
-        return container == null ? ItemStack.EMPTY : container.removeItemNoUpdate(i);
-    }
-
-    @Override
-    public void setItem(int i, @NotNull ItemStack itemStack) {
-        var container = this.getTargetAs(Container.class);
-        if (container != null) {
-            container.setItem(i, itemStack);
-        }
-    }
-
-    @Override
-    public boolean stillValid(@NotNull Player player) {
-        var container = this.getTargetAs(Container.class);
-        return container != null && container.stillValid(player);
-    }
-
-    @Override
-    public void clearContent() {
-        var container = this.getTargetAs(Container.class);
-        if (container != null) {
-            container.clearContent();
-        }
     }
 }

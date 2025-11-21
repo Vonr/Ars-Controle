@@ -4,16 +4,18 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
-import dev.qther.ars_controle.config.ACServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,8 +32,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDimensionalHighlighter {
-    public static final UUID ZERO_UUID = new UUID(0, 0);
-
     public WarpingSpellPrismTile(BlockPos pos, BlockState state) {
         super(ACRegistry.Tiles.WARPING_SPELL_PRISM.get(), pos, state);
     }
@@ -41,17 +41,15 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
             return null;
         }
 
-        var blockPos = this.getBlock();
+        var blockPos = this.getExistingData(ACRegistry.Attachments.GLOBAL_POS_TARGET).orElse(null);
         if (blockPos != null) {
-            var pos = blockPos.getCenter();
-            return new BlockHitResult(pos, Direction.DOWN, blockPos, true);
+            var pos = blockPos.pos().getCenter();
+            return new BlockHitResult(pos, Direction.DOWN, blockPos.pos(), true);
         }
 
-        var tag = this.getPersistentData();
-
+        UUID uuid = this.getExistingData(ACRegistry.Attachments.ENTITY_TARGET).orElse(null);
         Entity entity = null;
-        if (tag.hasUUID("entity")) {
-            var uuid = tag.getUUID("entity");
+        if (uuid != null) {
             entity = Cached.getEntityByUUID(uuid);
         }
 
@@ -63,20 +61,13 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
     }
 
     public void setBlock(@Nullable ResourceKey<Level> level, @Nullable BlockPos block) {
-        var tag = this.getPersistentData();
-        if (level == null) {
-            tag.remove("dimension");
-        }
-        if (block == null) {
-            tag.remove("block");
-        }
         if (level == null || block == null) {
-            this.setChanged();
-            return;
+            this.removeData(ACRegistry.Attachments.GLOBAL_POS_TARGET);
+        } else {
+            this.setData(ACRegistry.Attachments.GLOBAL_POS_TARGET, new GlobalPos(level, block));
+            this.removeData(ACRegistry.Attachments.ENTITY_TARGET);
         }
-        tag.putString("dimension", level.location().toString());
-        tag.putLong("block", block.asLong());
-        tag.remove("entity");
+
         this.setChanged();
     }
 
@@ -85,13 +76,9 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
             return null;
         }
 
-        var tag = this.getPersistentData();
-        if (this.getBlock() != null) {
-            var s = tag.contains("dimension", 8) ? tag.getString("dimension") : null;
-            if (s == null || level == null) {
-                return null;
-            }
-            return Cached.getLevelByName(s);
+        var pos = this.getExistingData(ACRegistry.Attachments.GLOBAL_POS_TARGET).orElse(null);
+        if (pos != null) {
+            return Cached.getLevelByKey(pos.dimension());
         }
 
         var entity = this.getEntity();
@@ -102,30 +89,24 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
         return null;
     }
 
-    public @Nullable BlockPos getBlock() {
-        var tag = this.getPersistentData();
-        return tag.contains("block", 99) ? BlockPos.of(tag.getLong("block")) : null;
-    }
-
-    public void setEntityUUID(UUID uuid) {
-        var tag = this.getPersistentData();
+    public void setEntityUUID(@Nullable UUID uuid) {
         if (uuid == null) {
-            tag.remove("entity");
+            this.removeData(ACRegistry.Attachments.ENTITY_TARGET);
         } else {
-            tag.putUUID("entity", uuid);
+            this.setData(ACRegistry.Attachments.ENTITY_TARGET, uuid);
+            this.removeData(ACRegistry.Attachments.GLOBAL_POS_TARGET);
         }
-        tag.remove("block");
+
         this.setChanged();
     }
 
-    public UUID getEntityUUID() {
-        var tag = this.getPersistentData();
-        return tag.contains("entity") ? tag.getUUID("entity") : ZERO_UUID;
+    public @Nullable UUID getEntityUUID() {
+        return this.getExistingData(ACRegistry.Attachments.ENTITY_TARGET).orElse(null);
     }
 
     public @Nullable Entity getEntity() {
         var uuid = getEntityUUID();
-        return uuid == ZERO_UUID ? null : Cached.getEntityByUUID(uuid);
+        return uuid == null ? null : Cached.getEntityByUUID(uuid);
     }
 
     public int getSourceRequired(HitResult hitResult) {
@@ -163,19 +144,28 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
     }
 
     @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        var data = this.getPersistentData();
+
+        if (data.contains("block", CompoundTag.TAG_LONG) && data.contains("dimension", CompoundTag.TAG_STRING)) {
+            var block = data.getLong("block");
+            var dimension = data.getString("dimension");
+            this.setData(ACRegistry.Attachments.GLOBAL_POS_TARGET, new GlobalPos(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimension)), BlockPos.of(block)));
+        } else if (data.contains("entity", CompoundTag.TAG_INT_ARRAY)) {
+            var entity = data.getUUID("entity");
+            this.setData(ACRegistry.Attachments.ENTITY_TARGET, entity);
+        }
+    }
+
+    @Override
     public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        var data = this.getPersistentData();
+        data.remove("entity");
+        data.remove("block");
+        data.remove("dimension");
+
         super.saveAdditional(tag, registries);
-
-        var uuid = this.getEntityUUID();
-        if (uuid != ZERO_UUID) {
-            tag.putUUID("entity", uuid);
-            return;
-        }
-
-        var pos = this.getBlock();
-        if (pos != null) {
-            tag.putLong("block", pos.asLong());
-        }
     }
 
     @Override
