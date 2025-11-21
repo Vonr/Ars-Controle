@@ -99,7 +99,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
     @Override
     public void onHit(ServerLevel world, BlockPos pos, @NotNull EntityProjectileSpell spell) {
-        if (spell.spellResolver == null) {
+        if (spell.resolver() == null) {
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
@@ -175,7 +175,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
                 return;
             }
 
-            spell.spellResolver.onResolveEffect(spell.level(), new EntityHitResult(entity, hit.getLocation()));
+            spell.resolver().onResolveEffect(spell.level(), new EntityHitResult(entity, hit.getLocation()));
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
@@ -208,7 +208,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             if (event.isCanceled()) {
                 return;
             }
-            spell.spellResolver.onResolveEffect(spell.level(), hit);
+            spell.resolver().onResolveEffect(spell.level(), hit);
             spell.remove(RemovalReason.DISCARDED);
         } else {
             var entities = spell.level().getEntities(spell, spell.getBoundingBox()).iterator();
@@ -220,7 +220,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
                 if (event.isCanceled()) {
                     return;
                 }
-                spell.spellResolver.onResolveEffect(spell.level(), new EntityHitResult(e, spell.position()));
+                spell.resolver().onResolveEffect(spell.level(), new EntityHitResult(e, spell.position()));
                 spell.remove(RemovalReason.DISCARDED);
             } else {
                 spell.setPos(spell.position().subtract(spell.getDeltaMovement()));
@@ -239,7 +239,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         EntityProjectileSpell spell = (EntityProjectileSpell) old.getType().create(level);
         if (spell != null) {
             spell.restoreFrom(old);
-            spell.spellResolver = old.spellResolver;
+            spell.setResolver(old.resolver());
             spell.prismRedirect = old.prismRedirect;
             spell.age = old.age;
             spell.pierceLeft = old.pierceLeft;
