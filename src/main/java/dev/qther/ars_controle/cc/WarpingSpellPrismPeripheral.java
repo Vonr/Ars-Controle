@@ -5,6 +5,7 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dev.qther.ars_controle.util.Cached;
 import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
+import dev.qther.ars_controle.util.XYZMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
@@ -74,12 +75,12 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
 
         map.put("type", hit.getType().toString().toLowerCase(Locale.ENGLISH));
         var loc = hit.getLocation();
-        map.put("location", ACPeripherals.vecToMap(loc));
+        map.put("location", XYZMap.of(loc));
 
         if (hit instanceof BlockHitResult bhr) {
             var bp = bhr.getBlockPos();
             var inner = new Object2ObjectArrayMap<String, Object>(2);
-            inner.put("pos", ACPeripherals.blockPosToMap(bp));
+            inner.put("pos", XYZMap.of(bp));
             inner.put("level", this.owner.getTargetLevel().dimension().location().toString());
             map.put("block", inner);
         } else if (hit instanceof EntityHitResult ehr) {
@@ -87,8 +88,8 @@ public class WarpingSpellPrismPeripheral implements IPeripheral {
             var inner = new Object2ObjectArrayMap<String, Object>(11);
             inner.put("type", BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
             inner.put("name", e.getName().getString());
-            inner.put("pos", ACPeripherals.vecToMap(e.getPosition(1.0f)));
-            inner.put("eyePos", ACPeripherals.vecToMap(e.getEyePosition()));
+            inner.put("pos", XYZMap.of(e.getPosition(1.0f)));
+            inner.put("eyePos", XYZMap.of(e.getEyePosition()));
             inner.put("level", e.level().dimension().location().toString());
             inner.put("yaw", Mth.wrapDegrees(e.getYRot()));
             inner.put("pitch", Mth.wrapDegrees(e.getXRot()));
