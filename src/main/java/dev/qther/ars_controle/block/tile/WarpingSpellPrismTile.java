@@ -188,6 +188,10 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
         }
 
         if (storedEntity != null) {
+            if (storedEntity instanceof Player && !player.isCreative() && !ACServerConfig.SERVER.WARPING_SPELL_PRISM_ALLOW_LINKING_OTHER_PLAYERS.get() && !storedEntity.getUUID().equals(player.getUUID())) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.fail.other_player"));
+                return Result.FAIL;
+            }
             this.setEntityUUID(storedEntity.getUUID());
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));
@@ -208,6 +212,10 @@ public class WarpingSpellPrismTile extends ModdedTile implements IWandable, IDim
         }
 
         if (storedEntity != null) {
+            if (storedEntity instanceof Player && !player.isCreative() && !ACServerConfig.SERVER.WARPING_SPELL_PRISM_ALLOW_LINKING_OTHER_PLAYERS.get() && !storedEntity.getUUID().equals(player.getUUID())) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.fail.other_player"));
+                return;
+            }
             this.setEntityUUID(storedEntity.getUUID());
             this.setChanged();
             PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.entity", storedEntity.getDisplayName(), storedEntity.level().dimension().location().toString()));

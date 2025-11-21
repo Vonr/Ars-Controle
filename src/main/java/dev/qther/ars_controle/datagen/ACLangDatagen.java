@@ -50,6 +50,7 @@ public class ACLangDatagen extends LanguageProvider {
         add("ars_controle.target.set.self", "Set target to yourself.");
         add("ars_controle.target.set.entity", "Set target to %s in %s.");
         add("ars_controle.target.set.block", "Set target to block at %s in %s.");
+        add("ars_controle.target.set.fail.other_player", "Linking other players is not allowed");
         add("ars_controle.target.get.none", "No target found.");
         add("ars_controle.target.get.entity", "Target entity: %s in %s.");
         add("ars_controle.target.get.block", "Target block: %s in %s.");

@@ -12,6 +12,7 @@ public class ACServerConfig {
     public final ModConfigSpec.ConfigValue<Integer> SCROLL_HOLDER_SOURCE_COST;
 
     public final ModConfigSpec.ConfigValue<Integer> SCRYERS_LINKAGE_LOAD_TIME;
+    public final ModConfigSpec.ConfigValue<Boolean> WARPING_SPELL_PRISM_ALLOW_LINKING_OTHER_PLAYERS;
 
     ACServerConfig(ModConfigSpec.Builder builder) {
         var warpingSpellPrism = new ConfigHelper.CategoryBuilder(builder, "warping_spell_prism");
@@ -21,6 +22,7 @@ public class ACServerConfig {
         WARPING_SPELL_PRISM_COST_PER_BLOCK = warpingSpellPrism.make("cost_per_block", 0.03125D, "Source Cost per block of Warping Spell Prism");
         WARPING_SPELL_PRISM_COST_DIMENSION = warpingSpellPrism.make("dimension_cost", 2000, "Source Cost when crossing dimensions of Warping Spell Prism");
         WARPING_SPELL_PRISM_LOAD_TIME = warpingSpellPrism.make("load_time", 600, "How long the Warping Spell Prism will load chunks (in ticks) after a teleport");
+        WARPING_SPELL_PRISM_ALLOW_LINKING_OTHER_PLAYERS = warpingSpellPrism.bool("allow_linking_other_players", false, "Whether to allow linking Warping Spell Prisms to other players");
         warpingSpellPrism.pop();
 
         var scrollHolder = new ConfigHelper.CategoryBuilder(builder, "scroll_holder");
