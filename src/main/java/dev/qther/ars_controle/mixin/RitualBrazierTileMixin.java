@@ -1,7 +1,10 @@
 package dev.qther.ars_controle.mixin;
 
+import com.hollingsworth.arsnouveau.api.item.inv.InventoryManager;
 import com.hollingsworth.arsnouveau.api.ritual.AbstractRitual;
+import com.hollingsworth.arsnouveau.api.spell.wrapped_caster.PlayerCaster;
 import com.hollingsworth.arsnouveau.common.block.tile.RitualBrazierTile;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.qther.ars_controle.registry.ACRegistry;
@@ -9,6 +12,7 @@ import dev.qther.ars_controle.util.Cached;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -69,5 +73,29 @@ public abstract class RitualBrazierTileMixin extends BlockEntity {
             } catch (Exception ignored) {
             }
         }
+    }
+
+    @WrapMethod(method = "getInventoryManager")
+    public InventoryManager getInventoryManager(Operation<InventoryManager> original) {
+        if (!(this.level instanceof ServerLevel serverLevel)) {
+            return original.call();
+        }
+
+        var tile = this.ritual.tile;
+        if (tile == null) {
+            return original.call();
+        }
+
+        var data = tile.getExistingData(ACRegistry.Attachments.ASSOCIATION);
+        if (data.isEmpty()) {
+            return original.call();
+        }
+
+        var player = serverLevel.getPlayerByUUID(data.get());
+        if (player == null) {
+            return original.call();
+        }
+
+        return new InventoryManager(new PlayerCaster(player));
     }
 }
