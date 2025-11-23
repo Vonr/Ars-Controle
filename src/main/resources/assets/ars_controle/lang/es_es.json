@@ -1,8 +1,8 @@
 {
   "ars_controle.config.enhanced_spellbook_controls": "Enhanced Spell Book Controls",
   "ars_controle.config.search_bar": "Search Bar",
-  "ars_controle.config.search_bar.clear_on_auto_focus": "Clear on Auto-Focus",
-  "ars_controle.config.search_bar.enable_auto_focus": "Enable Auto-Focus",
+  "ars_controle.config.search_bar.clear_on_auto_focus": "Desactivar Auto-Focus",
+  "ars_controle.config.search_bar.enable_auto_focus": "Activar Auto-Focus",
   "ars_controle.config.search_bar.escape_to_clear": "Escape to Clear",
   "ars_controle.config.spell_crafting": "Spell Crafting",
   "ars_controle.config.spell_crafting.swap_glyphs_with_number_keys": "Swap Glyphs With Number Keys",
