@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
 import com.hollingsworth.arsnouveau.common.util.PortUtil;
+import dev.qther.ars_controle.ArsControle;
 import dev.qther.ars_controle.datagen.ACBlockTagProvider;
 import dev.qther.ars_controle.registry.ACRegistry;
 import dev.qther.ars_controle.util.Cached;
@@ -33,23 +34,31 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         super(ACRegistry.Tiles.SCRYERS_LINKAGE.get(), pos, state);
     }
 
+    private void migrateOldData(CompoundTag data) {
+        if (!data.isEmpty() && data.contains("block", CompoundTag.TAG_LONG) && data.contains("dimension", CompoundTag.TAG_STRING)) {
+            var block = data.getLong("block");
+            var dimension = data.getString("dimension");
+            var level = Cached.getLevelByName(dimension);
+            if (level == null) {
+                ArsControle.LOGGER.warn("Could not migrate old Scryer Linkage data linked to {} in {}", BlockPos.of(block).toShortString(), dimension);
+                return;
+            }
+            ArsControle.LOGGER.warn("Migrated old Scryer Linkage data linked to {} in {}", BlockPos.of(block).toShortString(), dimension);
+            this.setBlock(level, BlockPos.of(block));
+            data.remove("block");
+            data.remove("dimension");
+        }
+    }
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        var data = this.getPersistentData();
-
-        if (data.contains("block", CompoundTag.TAG_LONG) && data.contains("dimension", CompoundTag.TAG_STRING)) {
-            var block = data.getLong("block");
-            var dimension = data.getString("dimension");
-            this.setData(ACRegistry.Attachments.GLOBAL_POS_TARGET, new GlobalPos(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimension)), BlockPos.of(block)));
-        }
+        migrateOldData(this.getPersistentData());
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         var data = this.getPersistentData();
-        data.remove("block");
-        data.remove("dimension");
         super.saveAdditional(tag, registries);
     }
 
@@ -62,7 +71,11 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         if (pos == null) {
             return null;
         }
-        return Pair.of(Cached.getLevelByKey(pos.dimension()), pos.pos());
+        var level = Cached.getLevelByKey(pos.dimension());
+        if (level == null) {
+            return null;
+        }
+        return Pair.of(level, pos.pos());
     }
 
     public boolean hasTarget() {
