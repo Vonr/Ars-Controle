@@ -43,7 +43,6 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
                 ArsControle.LOGGER.warn("Could not migrate old Scryer Linkage data linked to {} in {}", BlockPos.of(block).toShortString(), dimension);
                 return;
             }
-            ArsControle.LOGGER.warn("Migrated old Scryer Linkage data linked to {} in {}", BlockPos.of(block).toShortString(), dimension);
             this.setBlock(level, BlockPos.of(block));
             data.remove("block");
             data.remove("dimension");
