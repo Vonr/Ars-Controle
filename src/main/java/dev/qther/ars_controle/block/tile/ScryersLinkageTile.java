@@ -1,5 +1,9 @@
 package dev.qther.ars_controle.block.tile;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.hollingsworth.arsnouveau.api.item.IWandable;
 import com.hollingsworth.arsnouveau.client.particle.ColorPos;
 import com.hollingsworth.arsnouveau.common.block.tile.ModdedTile;
@@ -14,20 +18,22 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimensionalHighlighter {
     public ScryersLinkageTile(BlockPos pos, BlockState state) {
@@ -65,7 +71,7 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         return this.getExistingData(ACRegistry.Attachments.GLOBAL_POS_TARGET).orElse(null);
     }
 
-    public @Nullable Pair<Level, BlockPos> getTargetInfo() {
+    public @Nullable Pair<ServerLevel, BlockPos> getTargetInfo() {
         var pos = this.getTarget();
         if (pos == null) {
             return null;
@@ -81,7 +87,9 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         return this.hasData(ACRegistry.Attachments.GLOBAL_POS_TARGET);
     }
 
-    public boolean setBlock(@NotNull Level level, @NotNull BlockPos block) {
+    public boolean setBlock(@NotNull ServerLevel level, @NotNull BlockPos block) {
+        this.CAPABILITY_CACHES.invalidateAll();
+
         var thisLevel = this.getLevel();
         if (thisLevel == null) {
             return false;
@@ -99,6 +107,8 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
     }
 
     public void removeBlock() {
+        this.CAPABILITY_CACHES.invalidateAll();
+
         var level = this.getLevel();
         if (level == null) {
             return;
@@ -124,8 +134,8 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
         state.updateNeighbourShapes(level, pos, 3);
     }
 
-    private @Nullable Level getTargetLevel() {
-        if (level == null) {
+    private @Nullable ServerLevel getTargetLevel() {
+        if (!(this.level instanceof ServerLevel level)) {
             return null;
         }
 
@@ -136,10 +146,6 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
 
         if (level.dimension().equals(target.dimension())) {
             return level;
-        }
-
-        if (level.isClientSide) {
-            return null;
         }
 
         return Cached.getLevelByKey(target.dimension());
@@ -186,10 +192,9 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
 
     @Override
     public void onFinishedConnectionLast(@Nullable BlockPos storedPos, @Nullable Direction face, @Nullable LivingEntity storedEntity, Player player) {
-        if (storedPos != null) {
-            var level = player.level();
-            if (this.setBlock(level, storedPos)) {
-                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.toShortString(), level.dimension().location().toString()));
+        if (storedPos != null && player.level() instanceof ServerLevel serverLevel) {
+            if (this.setBlock(serverLevel, storedPos)) {
+                PortUtil.sendMessage(player, Component.translatable("ars_controle.target.set.block", storedPos.toShortString(), serverLevel.dimension().location().toString()));
             } else {
                 PortUtil.sendMessage(player, Component.translatable("ars_controle.remote.error.invalid_target"));
             }
@@ -212,5 +217,29 @@ public class ScryersLinkageTile extends ModdedTile implements IWandable, IDimens
             list.add(ColorPos.centered(target.second()));
         }
         return list;
+    }
+
+    private Cache<Query, BlockCapabilityCache<Object, @Nullable Object>> CAPABILITY_CACHES = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(1)).build();
+
+    public record Query(BlockCapability<Object, @Nullable Object> cap, @Nullable Object context) {}
+
+    @Nullable
+    public <T, C extends @Nullable Object> T getCapability(BlockCapability<T, C> cap, C context) {
+        var info = this.getTargetInfo();
+        if (info == null) {
+            return null;
+        }
+
+        try {
+            //noinspection unchecked
+            var erased = (BlockCapability<Object, Object>) cap;
+            var key = new Query(erased, context);
+            var value = CAPABILITY_CACHES.get(key, () -> BlockCapabilityCache.create(erased, info.first(), info.second(), context));
+
+            //noinspection unchecked
+            return (T) value.getCapability();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

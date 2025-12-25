@@ -61,20 +61,13 @@ public class ArsControle {
             }
 
             try {
+                //noinspection unchecked
                 var erased = (BlockCapability<Object, Object>) cap;
 
                 event.registerBlockEntity(erased, ACRegistry.Tiles.SCRYERS_LINKAGE.get(), (linkage, context) -> {
-                    var info = linkage.getTargetInfo();
-                    if (info == null) {
-                        return null;
-                    }
-
-                    var level = info.first();
-                    var block = info.second();
-
                     Object targetCap;
                     try {
-                        targetCap = level.getCapability(erased, block, context);
+                        targetCap = linkage.getCapability(erased, context);
                     } catch (StackOverflowError ignored) {
                         LOGGER.warn("Detected stack overflow when trying to query {} capability of Scryer's Linkage at {} in {}, removing target to resolve.", erased.name(), linkage.getBlockPos(), linkage.getLevel() != null ? linkage.getLevel().dimension().location() : "<null>");
                         linkage.removeBlock();
