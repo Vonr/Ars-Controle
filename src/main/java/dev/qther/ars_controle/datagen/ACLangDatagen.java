@@ -92,6 +92,8 @@ public class ACLangDatagen extends LanguageProvider {
         add("ars_nouveau.spell.validation.adding.unary_filters.next_not_filter", "%s requires the next glyph to be a Filter.");
         add("ars_nouveau.spell.validation.exists.unary_filters.no_chaining", "%s can not adapt another adaptive Filter.");
         add("ars_nouveau.spell.validation.adding.unary_filters.no_chaining", "%s can not adapt another adaptive Filter.");
+        add("ars_nouveau.spell.validation.exists.adaptive_filters.still_expecting_filters", "%s expects %d more filters.");
+        add("ars_nouveau.spell.validation.adding.adaptive_filters.still_expecting_filters", "%s expects %d more filters.");
 
         add("ars_controle.glyph.error.generic.error_at_position", "%s at position %d encountered an error.");
 

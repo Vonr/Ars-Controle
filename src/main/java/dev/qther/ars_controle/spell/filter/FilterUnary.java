@@ -119,6 +119,9 @@ public class FilterUnary extends AbstractFilter implements IAdaptiveFilter {
 
         var firstAugments = spell.getAugments(idx, caster);
         var skip = firstAugments.size() + 1;
+        if (next instanceof IAdaptiveFilter adaptiveFilter) {
+            skip += adaptiveFilter.operands();
+        }
 
         if (next instanceof FilterYLevel ynext) {
             ynext.y = (int) (this.res.spellContext.getCaster().getPosition().y - 1);
@@ -135,5 +138,10 @@ public class FilterUnary extends AbstractFilter implements IAdaptiveFilter {
         }
 
         return Pair.of(skip, afst);
+    }
+
+    @Override
+    public int operands() {
+        return 1;
     }
 }

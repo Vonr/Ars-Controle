@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,6 +124,9 @@ public class FilterBinary extends AbstractFilter implements IAdaptiveFilter {
 
         var firstAugments = spell.getAugments(idx, caster);
         var skip = firstAugments.size() + 1;
+        if (fst instanceof IAdaptiveFilter adaptiveFilter) {
+            skip += adaptiveFilter.operands();
+        }
 
         var snd = spell.get(idx + skip);
         if (!(snd instanceof IFilter asnd)) {
@@ -157,5 +161,40 @@ public class FilterBinary extends AbstractFilter implements IAdaptiveFilter {
         }
 
         return Pair.of(skip + 1, Pair.of(afst, asnd));
+    }
+
+    @Override
+    public int operands() {
+        return 2;
+    }
+
+    @Override
+    public boolean shouldResolve(Level level, HitResult hit, SpellContext spellContext) {
+        var f = this.getFilters();
+        if (f == null) {
+            return false;
+        }
+        var filters = f.second();
+
+        var idx = this.res.spellContext.getCurrentIndex();
+        this.res.spellContext.setCurrentIndex(idx + f.first());
+
+        try {
+            return op.apply(() -> switch (hit) {
+                case BlockHitResult blockHit -> filters.first().shouldResolveOnBlock(blockHit, level);
+                case EntityHitResult entityHit -> filters.first().shouldResolveOnEntity(entityHit, level);
+                case null, default -> false;
+            }, () -> switch (hit) {
+                case BlockHitResult blockHit -> filters.second().shouldResolveOnBlock(blockHit, level);
+                case EntityHitResult entityHit -> filters.second().shouldResolveOnEntity(entityHit, level);
+                case null, default -> false;
+            });
+        } catch (Exception e) {
+            if (res.spellContext.getUnwrappedCaster() instanceof Player player) {
+                PortUtil.sendMessageNoSpam(player, Component.translatable("ars_controle.glyph.error.generic.error_at_position", Component.translatable(this.getLocalizationKey()), idx));
+            }
+            ArsControle.LOGGER.error("Failed to resolve binary filter", e);
+            return false;
+        }
     }
 }
