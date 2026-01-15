@@ -117,6 +117,10 @@ public class RemoteItem extends ModItem implements IRadialProvider {
                     }
 
                     for (var pos : BlockPos.betweenClosed(data.firstCorner.get().pos(), blockPos)) {
+                        if (level.getBlockState(pos).isEmpty()) {
+                            continue;
+                        }
+
                         if (data.lockedFirst) {
                             wandable.onFirstConnection(new GlobalPos(level.dimension(), pos), ctx.getClickedFace(), null, player);
                         } else {
