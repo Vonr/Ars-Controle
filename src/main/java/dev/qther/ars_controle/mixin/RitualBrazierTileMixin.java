@@ -77,15 +77,11 @@ public abstract class RitualBrazierTileMixin extends BlockEntity {
 
     @WrapMethod(method = "getInventoryManager")
     public InventoryManager getInventoryManager(Operation<InventoryManager> original) {
-        if (!(this.level instanceof ServerLevel serverLevel)) {
+        if (!(this.level instanceof ServerLevel serverLevel) || this.ritual == null || this.ritual.tile == null) {
             return original.call();
         }
 
         var tile = this.ritual.tile;
-        if (tile == null) {
-            return original.call();
-        }
-
         var data = tile.getExistingData(ACRegistry.Attachments.ASSOCIATION);
         if (data.isEmpty()) {
             return original.call();
