@@ -44,7 +44,7 @@
   "ars_controle.remote.lock_mode.tooltip": "Locking %s",
   "ars_controle.remote.selection_mode.multiple": "Multiple",
   "ars_controle.remote.selection_mode.set": "Set selection mode to %s.",
-  "ars_controle.remote.selection_mode.single": "Single",
+  "ars_controle.remote.selection_mode.single": "Singolo",
   "ars_controle.remote.selection_mode.tooltip": "%s Selection",
   "ars_controle.remote.set_target": "Set remote target to %s in %s.",
   "ars_controle.spellbook.copied_to_clipboard": "Copied spell to clipboard.",
