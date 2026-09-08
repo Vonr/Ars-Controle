@@ -98,6 +98,15 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
     }
 
     @Override
+    public void onHit(Level level, BlockState state, BlockPos pos, @NotNull EntityProjectileSpell spell) {
+        // Newer Ars Nouveau dispatches this callback on both logical sides.
+        // Keep target resolution, Source consumption and teleportation server-side.
+        if (level instanceof ServerLevel serverLevel) {
+            onHit(serverLevel, pos, spell);
+        }
+    }
+
+    @Override
     public void onHit(ServerLevel world, BlockPos pos, @NotNull EntityProjectileSpell spell) {
         if (spell.resolver() == null) {
             spell.remove(RemovalReason.DISCARDED);

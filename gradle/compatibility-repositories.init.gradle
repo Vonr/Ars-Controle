@@ -1,0 +1,22 @@
+// Optional build-only mirrors for unavailable upstream repositories.
+// Usage: ./gradlew clean build -I gradle/compatibility-repositories.init.gradle
+// Keeps every dependency version unchanged; never modifies a Minecraft profile.
+allprojects {
+    repositories.all { repo ->
+        if (repo instanceof MavenArtifactRepository && repo.url.host == 'maven.parchmentmc.org') {
+            repo.url = uri('https://maven.neoforged.net/releases')
+        }
+        if (repo instanceof MavenArtifactRepository && repo.url.host == 'maven.octo-studios.com') {
+            // This domain now returns a parking page instead of Maven metadata.
+            repo.content { excludeGroupByRegex '.*' }
+        }
+    }
+    repositories.ivy {
+        name = 'ArchivedCuriosContinuation9012'
+        // Exact original 9.0.12+1.21 release, not a dependency upgrade.
+        url = uri('https://cdn.modrinth.com/data/BaqCltvf/versions/Oy2VDRrv')
+        patternLayout { artifact 'curios-neoforge-[revision].[ext]' }
+        metadataSources { artifact() }
+        content { includeVersion 'top.theillusivec4.curios', 'curios-neoforge', '9.0.12+1.21' }
+    }
+}
