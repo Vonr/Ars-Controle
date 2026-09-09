@@ -14,6 +14,7 @@ import dev.qther.ars_controle.block.tile.WarpingSpellPrismTile;
 import dev.qther.ars_controle.config.ACServerConfig;
 import dev.qther.ars_controle.packets.clientbound.PacketRenderBlockOutline;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -160,7 +161,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
                 }
             }
 
-            hit = b.withDirection(spell.getDirection());
+            hit = b.withDirection(Direction.getNearest(spell.getDeltaMovement()));
         }
 
         if (hit instanceof EntityHitResult e) {
