@@ -97,14 +97,24 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
         return InteractionResult.PASS;
     }
 
+    @SuppressWarnings("removal")
     @Override
-    public void onHit(ServerLevel world, BlockPos pos, @NotNull EntityProjectileSpell spell) {
+    public void onHit(ServerLevel world, BlockPos pos, EntityProjectileSpell spell) {
+        this.onHit(world, world.getBlockState(pos), pos, spell);
+    }
+
+    @Override
+    public void onHit(Level world, BlockState state, BlockPos pos, EntityProjectileSpell spell) {
+        if (!(world instanceof ServerLevel level)) {
+            return;
+        }
+
         if (spell.resolver() == null) {
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
 
-        WarpingSpellPrismTile tile = (WarpingSpellPrismTile) world.getBlockEntity(pos);
+        WarpingSpellPrismTile tile = (WarpingSpellPrismTile) level.getBlockEntity(pos);
         if (tile == null) {
             ArsControle.LOGGER.error("No tile entity in warping spell prism.");
             return;
@@ -112,14 +122,14 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         var hit = tile.getHitResult();
         if (hit == null) {
-            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            level.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
 
         var dim = tile.getTargetLevel();
         if (dim == null) {
-            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            level.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
@@ -136,7 +146,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
                     true
             );
         } else if (!dim.isLoaded(hitPos)) {
-            world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+            level.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
             spell.remove(RemovalReason.DISCARDED);
             return;
         }
@@ -164,7 +174,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             var entity = e.getEntity();
             if (!entity.isAlive()) {
                 tile.setEntityUUID(null);
-                world.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
+                level.sendParticles(ParticleTypes.ANGRY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0, 0D, 0, 0D);
                 spell.remove(RemovalReason.DISCARDED);
                 return;
             }
@@ -191,15 +201,15 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
 
         int manaCost = tile.getSourceRequired(hit);
         if (manaCost > 0) {
-            if (SourceUtil.takeSourceMultipleWithParticles(pos, world, 19, manaCost) == null) {
-                world.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, world.random.nextInt(4) + 1, 0, 0D, 0, 0D);
+            if (SourceUtil.takeSourceMultipleWithParticles(pos, level, 19, manaCost) == null) {
+                level.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, level.random.nextInt(4) + 1, 0, 0D, 0, 0D);
                 spell.remove(RemovalReason.DISCARDED);
                 return;
             }
         }
 
         if (++spell.prismRedirect >= 3) {
-            ANCriteriaTriggers.rewardNearbyPlayers(ANCriteriaTriggers.PRISMATIC.get(), world, pos, 10);
+            ANCriteriaTriggers.rewardNearbyPlayers(ANCriteriaTriggers.PRISMATIC.get(), level, pos, 10);
         }
 
         if (spell.level().getBlockCollisions(spell, spell.getBoundingBox()).iterator().hasNext()) {
@@ -227,7 +237,7 @@ public class WarpingSpellPrismBlock extends ModBlock implements IPrismaticBlock,
             }
         }
 
-        BlockUtil.updateObservers(world, pos);
+        BlockUtil.updateObservers(level, pos);
     }
 
     @Override
